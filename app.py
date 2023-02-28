@@ -1,7 +1,8 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-@app.route("/login")
+@app.route('/')
+@app.route('home')
 def index():
-    return render_template("login.html")
+    return render_template("starter.html")

@@ -34,7 +34,11 @@
         </div>
       </nav>
   
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">
+        <main class="container-fluid py-5 text-center">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

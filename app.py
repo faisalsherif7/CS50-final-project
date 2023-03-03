@@ -14,3 +14,7 @@ def login():
 @app.route('/fatwa')
 def fatwa():
     return render_template('fatwa.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')

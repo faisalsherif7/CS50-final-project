@@ -10,3 +10,7 @@ def index():
 @app.route('/login')
 def login():
     return render_template('login.html')
+
+@app.route('/fatwa')
+def fatwa():
+    return render_template('fatwa.html')

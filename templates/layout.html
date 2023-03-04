@@ -36,8 +36,18 @@
               </li>
           </ul>
         </div>
-        </div>
-      </nav>
+      </div>
+    </nav>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="alert alert-danger mb-0 text-center" role="alert">
+      {% for message in messages %}
+        <ul>{{ message }}</ul>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    {% endwith %}
   
     <div id="content">
         <main class="container-fluid py-5 text-center">

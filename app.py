@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash, session, jsonify
 from flask_session import Session
 from cs50 import SQL
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -22,12 +22,11 @@ def login():
     # Forget any user_id
     session.clear()
 
-    tracker = 0
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
         
-        
+        tracker = 0
+
         # Ensure username was submitted
         if not request.form.get("username"):
             flash("must provide username")

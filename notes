@@ -1,1 +1,0 @@
-If (and only if) already comfortable with SQL, you’re welcome to use SQLAlchemy Core or Flask-SQLAlchemy (i.e., SQLAlchemy ORM) instead of cs50.SQL.

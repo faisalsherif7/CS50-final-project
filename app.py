@@ -125,3 +125,11 @@ def guide():
 @app.route('/fatwa')
 def fatwa():
     return render_template('fatwa.html')
+
+@app.route('/dashboard')
+def history():
+    return render_template('dashboard.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')

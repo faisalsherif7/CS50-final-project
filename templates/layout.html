@@ -11,13 +11,14 @@
     
     <!-- My CSS -->
     <link rel="stylesheet" href="/static/lux.css">
-    <title>SZC - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>Ratib - {% block title %}{% endblock %}</title>
     {% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-black">
+    <nav class="navbar navbar-expand-md navbar-light bg-light mx-auto">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">Salary Zakat Calculator</a>
+            <a class="navbar-brand" href="/">Ratib</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -30,11 +31,19 @@
               <a class="nav-link" href="/guide">User Guide</a>
             </li>
           </ul>
+          {% if session["user_id"] %}
           <ul class="navbar-nav ms-auto">
-              <li class="nav-item">
-                  <a class="nav-link text-white" href="/login">Login/Register</a>
-              </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log Out</a>
+            </li>
           </ul>
+          {% else %}
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login/Register</a>
+                </li>
+            </ul>
+          {% endif %}
         </div>
       </div>
     </nav>

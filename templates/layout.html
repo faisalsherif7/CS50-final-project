@@ -59,8 +59,10 @@
     {% endwith %}
   
     <div id="content">
-        <main class="container-fluid py-5 text-center">
+        <main class="container py-5 text-center">
+          <div class="row text-left">
             {% block content %}{% endblock %}
+          </div>
         </main>
     </div>
 

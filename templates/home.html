@@ -4,6 +4,86 @@
 
 {% block content %}
 
-Welcome page.
+
+{% if session["user_id"] %}
+
+<h1>
+    Welcome, {{ u }}. Update your table here.
+</h1>
+<p class="fs-4">
+    Add any income entry below, and we will track it from the moment of entry for one year, upon 
+    which you will be notified to pay zakat for the amount in the 'zakat due' table.
+</p>
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <div class="card text-center text-bg-dark mb-3">
+                <div class="card-header pt-3">
+                    <h2>ZAKAT FORM</h2>
+                </div>
+                <div class="card-body justify-content-center">
+                    <form class="" action="/addmoney" method="post">
+                        <div class="row">
+                            <div class="form-group text-center col-auto">
+                                <input autocomplete="off" class="form-control mx-auto" type="number" placeholder="Enter income amount"> 
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-secondary" type="submit" name="action" value="income">Add income</button>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="form-group text-center col-auto">
+                                <input autocomplete="off" class="form-control mx-auto" type="number" placeholder="Enter expense amount"> 
+                            </div>
+                            <div class="form-group text-center col-auto">
+                                <button class="btn btn-secondary" type="submit" name="action" value="expense">Add expense</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% else %}
+
+<h1 class="text-center">
+    Welcome, {{ u }}!
+</h1>
+<div class="fs-4">
+    <p class="pt-3">
+        RATIB is a Salary Zakat Calculator. 
+    </p>
+    
+    <p>
+        Zakat is an Islamic financial term. As one of the pillars of the faith, it requires all Muslims to 
+        donate a portion of their wealth to charity. Muslims must meet a certain threshold before they can 
+        qualify for zakat. The amount is 2.5% or 1/40 of an individual's total savings and wealth. Zakat can 
+        be paid at any time during the lunar year.
+    </p>
+    <p>
+        Muslims should take inventory of their possessions and wealth. Once they reach nisab or the threshold, 
+        which is the value of 87.48 grams of gold or 612.36 grams of silver, they must pay zakat. The total amount 
+        to be paid is 2.5% or 1/40 of their total savings and wealth. Muslims can use any number of zakat calculators 
+        which are available online to determine their obligations.
+    </p>
+    <p>
+        As for calculating zakat for monthly salary, most scholars recommend calculating it at the end of one lunar year
+        for ease of calculations. However, there is a more accurate method for calculating the exact amount, as mentioned
+        in the <a href="/fatwa">fatwa</a> by Shaykh Ibn Baz.
+    </p>
+    <p>
+        RATIB is designed to make this calculation of zakat on monthly salary easier for its users. Check out our 
+        <a href="/guide">user guide</a> for more information on how RATIB works.
+    </p>
+</div>
+
+
+{% endif %}
 
 {% endblock %}

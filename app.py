@@ -127,9 +127,24 @@ def fatwa():
     return render_template('fatwa.html')
 
 @app.route('/dashboard')
-def history():
+def dashboard():
     return render_template('dashboard.html')
 
 @app.route('/settings')
 def settings():
     return render_template('settings.html')
+
+@app.route('/addmoney', methods=["GET", "POST"])
+def addmoney():
+    if request.method == "POST":
+        return redirect('/')
+    else:
+        return redirect('/')
+    
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+@app.route('/tracked')
+def tracked():
+    return render_template('tracked.html')

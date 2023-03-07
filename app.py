@@ -20,23 +20,8 @@ app = Flask(__name__)
 # Enter secret key for app to encrypt session data 
 app.secret_key = 'your_secret_key_here'
 
-@app.route('/')
-@app.route('/home')
-def index():
-    if flasksession.get("user_id"):
-        userid = flasksession.get("user_id")
-        user = session.query(User).filter_by(id=userid).first()
-        username = user.username if user else None
-        return render_template("home.html", u = username)
-    else:
-        return render_template("home.html", u = 'random user')
-
-@app.route('/logout')
-def logout():
-
-    # Forget any user_id
-    flasksession.clear()
-    return redirect('/')
+# Initialize global variable so that it can be updated when logging in
+userid = None
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -72,15 +57,29 @@ def login():
 
             # Remember which user has logged in
             flasksession["user_id"] = rows.id
+            userid = rows.id
 
             # Redirect user to home page
             return redirect("/")
         else:
             return redirect("/login")
 
-    
+@app.route('/')
+@app.route('/home')
+def index():
+    if flasksession.get("user_id"):
+        user = session.query(User).filter_by(id=userid).first()
+        username = user.username if user else None
+        return render_template("home.html", u = username)
+    else:
+        return render_template("home.html", u = 'random user')
 
-    
+@app.route('/logout')
+def logout():
+
+    # Forget any user_id
+    flasksession.clear()
+    return redirect('/')
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -145,7 +144,21 @@ def settings():
 @app.route('/addmoney', methods=["GET", "POST"])
 def addmoney():
     if request.method == "POST":
-        return redirect('/')
+        action = request.form.get('action')
+        if action == 'income':
+            amount = request.form.get('income')
+            income = Income(amount=amount, user_id=userid)
+            session.add(income)
+            session.commit()
+            flash("income added successfully!")
+            return redirect('/')
+        elif action == 'expense':
+            amount = request.form.get('expense')
+            expense = Expenses(amount=amount, user_id=userid)
+            session.add(expense)
+            session.commit()
+            flash("expense added successfully!")
+            return redirect('/')
     else:
         return redirect('/')
     

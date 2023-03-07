@@ -1,44 +1,39 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Numeric, ForeignKey
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import func
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 
-Base = declarative_base()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///zakat.db'
+db = SQLAlchemy(app)
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String, nullable=False, unique=True)
-    hash = Column(String, nullable=False)
-    income = relationship("Income", back_populates="user")
-    expenses = relationship("Expenses", back_populates="user")
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, nullable=False, unique=True)
+    hash = db.Column(db.String, nullable=False)
+    income = db.relationship("Income", back_populates="user")
+    expenses = db.relationship("Expenses", back_populates="user")
     
-class Income(Base):
+class Income(db.Model):
     __tablename__ = 'income'
-    id = Column(Integer, primary_key=True)
-    amount = Column(Numeric(10,2))
-    date = Column(DateTime, default=func.now())
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="income")
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Numeric(10,2))
+    date = db.Column(db.DateTime, default=db.func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship("User", back_populates="income")
     
-class Expenses(Base):
+class Expenses(db.Model):
     __tablename__ = 'expenses'
-    id = Column(Integer, primary_key=True)
-    amount = Column(Numeric(10,2))
-    date = Column(DateTime, default=func.now())
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="expenses")
-
-engine = create_engine('sqlite:///zakat.db')
-Base.metadata.create_all(engine)
-Session = scoped_session(sessionmaker(bind=engine))
-session = Session()
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Numeric(10,2))
+    date = db.Column(db.DateTime, default=db.func.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship("User", back_populates="expenses")
 
 @event.listens_for(Expenses, 'after_insert')
 def update_income(mapper, connection, target):
     remaining_amount = target.amount
-    incomes = session.query(Income).filter(Income.user_id == target.user_id).order_by(Income.date.desc()).all()
+    incomes = Income.query.filter(Income.user_id == target.user_id).order_by(Income.date.desc()).all()
     for income in incomes:
         if remaining_amount > 0:
             if remaining_amount >= income.amount:
@@ -49,4 +44,4 @@ def update_income(mapper, connection, target):
                 remaining_amount = 0
         else:
             break
-    session.commit()
+    db.session.commit()

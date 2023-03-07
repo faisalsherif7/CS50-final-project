@@ -1,14 +1,21 @@
 from flask import Flask, render_template, request, redirect, flash, session, jsonify
 from flask_session import Session
-from cs50 import SQL
 from werkzeug.security import check_password_hash, generate_password_hash
 import hijri_converter
 
+# tryout sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from models import User, Income, Expenses
+
+flasksession = session
+
+engine = create_engine('sqlite:///zakat.db')
+Session = (sessionmaker(bind=engine))
+session = Session()
+
 # create the app
 app = Flask(__name__)
-
-# point to database
-db = SQL("sqlite:///project.db")
 
 # Enter secret key for app to encrypt session data 
 app.secret_key = 'your_secret_key_here'
@@ -16,11 +23,10 @@ app.secret_key = 'your_secret_key_here'
 @app.route('/')
 @app.route('/home')
 def index():
-    if session.get("user_id"):
-        userid = session.get("user_id")
-        usernamelist = db.execute("SELECT username FROM users WHERE id IS ?", userid)
-        usernamedict = usernamelist[0]
-        username = usernamedict['username']
+    if flasksession.get("user_id"):
+        userid = flasksession.get("user_id")
+        user = session.query(User).filter_by(id=userid).first()
+        username = user.username if user else None
         return render_template("home.html", u = username)
     else:
         return render_template("home.html", u = 'random user')
@@ -29,7 +35,7 @@ def index():
 def logout():
 
     # Forget any user_id
-    session.clear()
+    flasksession.clear()
     return redirect('/')
 
 @app.route('/login', methods=["GET", "POST"])
@@ -54,10 +60,10 @@ def login():
             tracker = 1
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        rows = session.query(User).filter_by(username=username).first()
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if not rows or not check_password_hash(rows.hash, request.form.get("password")):
             if tracker != 1:
                 flash("Invalid username and/or password")
             tracker = 2
@@ -65,7 +71,7 @@ def login():
         if tracker == 0:
 
             # Remember which user has logged in
-            session["user_id"] = rows[0]["id"]
+            flasksession["user_id"] = rows.id
 
             # Redirect user to home page
             return redirect("/")
@@ -106,14 +112,15 @@ def register():
             if password != confirmation:
                 flash("Passwords do not match!")
                 tracker = 5
-        existing = db.execute("SELECT username FROM users")
-        for each in existing:
-            if username == each["username"]:
-                flash("Username already exists!")
-                tracker = 6 
+        existing = session.query(User).filter_by(username=username).all()
+        if existing:
+            flash("Username already exists!")
+            tracker = 6 
         if tracker == 0:
             hashed = generate_password_hash(password)
-            db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, hashed)
+            newuser = User(username=username, hash=hashed)
+            session.add(newuser)
+            session.commit()
             return redirect("/")
         else:
             return redirect("/register")

@@ -1,18 +1,12 @@
-from flask import Flask, render_template, request, redirect, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, flash, jsonify
+from flask import session as flasksession
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 import hijri_converter
 
 # tryout sqlalchemy
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from database import db_session as session
 from models import User, Income, Expenses
-
-flasksession = session
-
-engine = create_engine('sqlite:///zakat.db', connect_args={"check_same_thread": False})
-Session = (sessionmaker(bind=engine))
-session = Session()
 
 # create the app
 app = Flask(__name__)
@@ -169,4 +163,8 @@ def history():
 def tracked():
     return render_template('tracked.html')
 
-session.rollback()
+
+# SQLAlchemy - Flask removes database sessions at end of request
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    session.remove()

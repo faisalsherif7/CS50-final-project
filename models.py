@@ -1,10 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Numeric, ForeignKey
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, event
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy import event
+from database import Base
+from database import db_session as session
 
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
@@ -29,11 +28,6 @@ class Expenses(Base):
     date = Column(DateTime, default=func.now())
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="expenses")
-
-engine = create_engine('sqlite:///zakat.db')
-Base.metadata.create_all(engine)
-Session = scoped_session(sessionmaker(bind=engine))
-session = Session()
 
 @event.listens_for(Expenses, 'after_insert')
 def update_income(mapper, connection, target):

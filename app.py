@@ -5,14 +5,13 @@ import hijri_converter
 
 # tryout sqlalchemy
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from models import User, Income, Expenses
 
 flasksession = session
 
-
-engine = create_engine('sqlite:///zakat.db', connect_args={"check_same_thread": False})
-Session = sessionmaker(bind=engine)
+engine = create_engine('sqlite:///zakat.db')
+Session = (sessionmaker(bind=engine))
 session = Session()
 
 # create the app
@@ -121,8 +120,7 @@ def register():
             newuser = User(username=username, hash=hashed)
             session.add(newuser)
             session.commit()
-            flash("Succesfully registered! You can log in now.")
-            return redirect("/login")
+            return redirect("/")
         else:
             return redirect("/register")
 

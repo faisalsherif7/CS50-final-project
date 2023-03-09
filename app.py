@@ -10,6 +10,7 @@ from models import User, Income, Expenses
 
 flasksession = session
 
+
 engine = create_engine('sqlite:///zakat.db', connect_args={"check_same_thread": False})
 Session = sessionmaker(bind=engine)
 session = Session()

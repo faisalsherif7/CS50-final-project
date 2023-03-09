@@ -37,7 +37,7 @@ session = Session()
 
 @event.listens_for(Expenses, 'after_insert')
 def update_income(mapper, connection, target):
-    remaining_amount = target.amount
+    remaining_amount = int(target.amount)
     incomes = session.query(Income).filter(Income.user_id == target.user_id).order_by(Income.date.desc()).all()
     for income in incomes:
         if remaining_amount > 0:

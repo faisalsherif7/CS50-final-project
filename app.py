@@ -4,14 +4,12 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 import hijri_converter
 
-# tryout sqlalchemy
+# imports for sqlalchemy
 from database import db_session as session
 from models import User, Income, Expenses
 
 # create the app
 app = Flask(__name__)
-
-# Enter secret key for app to encrypt session data 
 app.secret_key = 'your_secret_key_here'
 
 # Initialize global variable so that it can be updated when logging in

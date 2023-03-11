@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 from database import db_session as session
+from utils import calculate_due_date
 
 
 class User(Base):
@@ -18,9 +19,10 @@ class Income(Base):
     id = Column(Integer, primary_key=True)
     amount = Column(Numeric(10,2))
     date = Column(DateTime, default=func.now())
+    due_date = Column(DateTime, default=calculate_due_date())
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="income")
-    
+
 class Expenses(Base):
     __tablename__ = 'expenses'
     id = Column(Integer, primary_key=True)

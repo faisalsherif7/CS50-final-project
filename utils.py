@@ -1,11 +1,12 @@
 from hijri_converter import Hijri, Gregorian
 from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
-def due_date(passed_in_current_date):
-        current_date = passed_in_current_date
+def calculate_due_date():
+        current_date = datetime.now()
         current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
-        next_hijri_year = current_hijri_date[0] + 1
-        next_gregorian_date = Hijri(next_hijri_year, current_hijri_date[1], current_hijri_date[2]).to_gregorian()
+        next_hijri_year = current_hijri_date.year + 1
+        next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
         return next_gregorian_date
 
 def calculate_zakat_due(savings_amount, user_id):
@@ -13,7 +14,7 @@ def calculate_zakat_due(savings_amount, user_id):
     current_hijri_year = hijri_converter.Gregorian(datetime.now()).to_hijri().year
     
     # Calculate the Hijri year for the savings_amount
-    hijri_year = hijri_converter.Gregorian(datetime.now().replace(month=1, day=1) - timedelta(days=1) + relativedelta(years=-savings_amount))).to_hijri().year
+    hijri_year = hijri_converter.Gregorian(datetime.now().replace(month=1, day=1) - timedelta(days=1) + relativedelta(years=-savings_amount)).to_hijri().year
     
     # Check if the difference between the current and savings Hijri year is >= 1
     if current_hijri_year - hijri_year >= 1:

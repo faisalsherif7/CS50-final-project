@@ -138,6 +138,9 @@ def addmoney():
         action = request.form.get('action')
         if action == 'income':
             amount = request.form.get('income')
+            if not amount:
+                flash("Please enter amount!")
+                return redirect('/')
             income = Income(amount=amount, user_id=userid)
             session.add(income)
             session.commit()
@@ -145,6 +148,9 @@ def addmoney():
             return redirect('/')
         elif action == 'expense':
             amount = request.form.get('expense')
+            if not amount:
+                flash("Please enter amount!")
+                return redirect('/')
             expense = Expenses(amount=amount, user_id=userid)
             session.add(expense)
             session.commit()

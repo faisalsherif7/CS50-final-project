@@ -29,18 +29,3 @@ class Expenses(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="expenses")
 
-@event.listens_for(Expenses, 'after_insert')
-def update_income(mapper, connection, target):
-    remaining_amount = int(target.amount)
-    incomes = session.query(Income).filter(Income.user_id == target.user_id).order_by(Income.date.desc()).all()
-    for income in incomes:
-        if remaining_amount > 0:
-            if remaining_amount >= income.amount:
-                income.amount = 0
-                remaining_amount -= income.amount
-            else:
-                income.amount -= remaining_amount
-                remaining_amount = 0
-        else:
-            break
-    session.commit()

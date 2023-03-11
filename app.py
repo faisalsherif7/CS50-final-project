@@ -49,6 +49,7 @@ def login():
 
             # Remember which user has logged in
             flasksession["user_id"] = rows.id
+            global userid 
             userid = rows.id
 
             # Redirect user to home page
@@ -165,7 +166,8 @@ def history():
 
 @app.route('/tracked')
 def tracked():
-    return render_template('tracked.html')
+    incomes = session.query(Income).filter_by(user_id=userid)
+    return render_template('tracked.html', incomes=incomes)
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

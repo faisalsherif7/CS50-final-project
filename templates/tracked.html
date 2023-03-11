@@ -4,9 +4,27 @@
 
 {% block content %}
 
-<p class="fs-2">
-    Here we include a table of all currently tracked income entries, with expenses already subtracted according
-    to last entered first spent. Write that down for clarity to the user.
-</p>
+    <p class="fs-2">
+        Here we include a table of all currently tracked income entries, with expenses already subtracted according
+        to last entered first spent. Write that down for clarity to the user.
+    </p>
+    <table class="table">
+        <thead>
+            <th>Date added</th>
+            <th>Amount</th>
+            <th>something</th>
+        </thead>
+        <tbody>
+            {% for income in incomes %}
+            <tr>
+                <td>{{ income.date }}</td>
+                <td>{{ income.amount }}</td>
+                <td>
+                    <!-- button to modify/paid/something -->
+                </td>
+            </tr> 
+            {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock %}

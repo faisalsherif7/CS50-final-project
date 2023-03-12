@@ -7,17 +7,14 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col">
-            <div class="card text-center mb-3">
-                <div class="card-header pt-3">
-                    <h2>ZAKAT FORM</h2>
-                </div>
-                <div class="card-body justify-content-center">
+            <div class="card text-center text-white bg-info mb-3">
+                <div class="card-body justify-content-center mt-3">
                     <form class="" action="/addmoney" method="post">
                         <div class="row justify-content-center">
                             <div class="form-group text-center col-auto">
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input autocomplete="off" class="form-control mx-auto" type="number" name="income" placeholder="Enter income amount" control-id="ControlID-38"> 
+                                    <input autocomplete="off" class="form-control mx-auto" type="number" name="income" placeholder="Enter income amount" > 
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -40,15 +37,15 @@
     </div>
 </div>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered">
+    <thead class="table-dark text-center">
         <th>Date added</th>
             <th>Amount</th>
             <th>Date Due</th>
             <th>Due Amount</th>
             <th>Modify</th>
         </thead>
-        <tbody>
+        <tbody class="table-info">
             {% for income in incomes %}
             <tr>
                 <td>{{ income.date }}</td>

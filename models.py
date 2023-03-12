@@ -20,6 +20,7 @@ class Income(Base):
     amount = Column(Numeric(10,2))
     date = Column(DateTime, default=func.now())
     due_date = Column(DateTime, default=calculate_due_date())
+    due_amount = Column(Numeric(10,2))
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="income")
 
@@ -30,4 +31,6 @@ class Expenses(Base):
     date = Column(DateTime, default=func.now())
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="expenses")
+
+    
 

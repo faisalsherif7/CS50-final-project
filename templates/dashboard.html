@@ -1,16 +1,76 @@
 {% extends 'layout.html' %}
 
-{% block title %}Zakat Due{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
-<p class="fs-1">
-    here, we include zakat due table.
-</p>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col">
+            <div class="card text-center mb-3">
+                <div class="card-header pt-3">
+                    <h2>ZAKAT FORM</h2>
+                </div>
+                <div class="card-body justify-content-center">
+                    <form class="" action="/addmoney" method="post">
+                        <div class="row justify-content-center">
+                            <div class="form-group text-center col-auto">
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input autocomplete="off" class="form-control mx-auto" type="number" name="income" placeholder="Enter income amount" control-id="ControlID-38"> 
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary" type="submit" name="action" value="income">Add income</button>
+                            </div>
+                            <div class="form-group text-center col-auto">
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input autocomplete="off" class="form-control mx-auto" type="number" name="expense" placeholder="Enter expense amount" > 
+                                </div>
+                            </div>
+                            <div class="form-group text-center col-auto">
+                                <button class="btn btn-primary" type="submit" name="action" value="expense" id="button-addon2" control-id="ControlID-40">Add expense</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<p class="fs-2">
-    then, maybe in a different tab, we include table with complete history -
-    all entries, both income and expenses. 
-</p>
+<table class="table">
+    <thead>
+        <th>Date added</th>
+            <th>Amount</th>
+            <th>Date Due</th>
+            <th>Due Amount</th>
+            <th>Modify</th>
+        </thead>
+        <tbody>
+            {% for income in incomes %}
+            <tr>
+                <td>{{ income.date }}</td>
+                <td>{{ income.amount | usd}}</td>
+                <td>{{ income.due_date }}</td>
+                <td>{{ income.due_amount | usd}}</td>    
+                <td>
+                    <form action="/delete_entry", method="post">
+                        <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                        <button type="submit" class="btn btn-danger" control-id="ControlID-49">Delete entry</button>
+                    </form>
+                </td>
+            </tr> 
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr class="border border-primary border-3 opacity-75">
+    <p class="fs-2">
+        Here we include a table of all currently tracked income entries, with expenses already subtracted according
+        to last entered first spent. Write that down for clarity to the user.
+
+        Nah, here we add the income table which includes all entries and the zakat due. 
+    </p>
 
 {% endblock %}

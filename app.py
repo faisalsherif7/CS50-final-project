@@ -2,18 +2,25 @@ from flask import Flask, render_template, request, redirect, flash, jsonify
 from flask import session as flasksession
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-import hijri_converter
 
 # imports for sqlalchemy
 from database import db_session as session
 from models import User, Income, Expenses
 
+# imports from util
+from utils import login_required, usd
+
 # create the app
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# Initialize global variable so that it can be updated when logging in
-userid = None
+# Jinja usd filter
+app.jinja_env.filters["usd"] = usd
+
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -49,8 +56,6 @@ def login():
 
             # Remember which user has logged in
             flasksession["user_id"] = rows.id
-            global userid 
-            userid = rows.id
 
             # Redirect user to home page
             return redirect("/")
@@ -61,6 +66,7 @@ def login():
 @app.route('/home')
 def index():
     if flasksession.get("user_id"):
+        userid = flasksession.get("user_id")
         user = session.query(User).filter_by(id=userid).first()
         username = user.username if user else None
         return render_template("home.html", u = username)
@@ -68,6 +74,7 @@ def index():
         return render_template("home.html", u = 'random user')
 
 @app.route('/logout')
+@login_required
 def logout():
 
     # Forget any user_id
@@ -121,42 +128,44 @@ def register():
 def guide():
     return render_template('guide.html')
 
-@app.route('/fatwa')
-def fatwa():
-    return render_template('fatwa.html')
-
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    return render_template('dashboard.html')
+    userid = flasksession.get("user_id")
+    incomes = session.query(Income).filter_by(user_id=userid)
+    return render_template('dashboard.html', incomes=incomes)
 
 @app.route('/settings')
+@login_required
 def settings():
     return render_template('settings.html')
 
 @app.route('/addmoney', methods=["GET", "POST"])
+@login_required
 def addmoney():
     if request.method == "POST":
         action = request.form.get('action')
+        userid = flasksession.get("user_id")
         if action == 'income':
             amount = request.form.get('income')
             if not amount:
                 flash("Please enter amount!")
                 return redirect('/')
-            income = Income(amount=amount, user_id=userid)
+            income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)))
             session.add(income)
             session.commit()
             flash("income added successfully!")
-            return redirect('/')
+            return redirect('/dashboard')
         elif action == 'expense':
             amount = request.form.get('expense')
             if not amount:
                 flash("Please enter amount!")
-                return redirect('/')
+                return redirect('/dashboard')
             expense = Expenses(amount=amount, user_id=userid)
             session.add(expense)
             session.commit()
             flash("expense added successfully!")
-            return redirect('/')
+            return redirect('/dashboard')
     else:
         return redirect('/')
     
@@ -165,9 +174,23 @@ def history():
     return render_template('history.html')
 
 @app.route('/tracked')
+
 def tracked():
-    incomes = session.query(Income).filter_by(user_id=userid)
-    return render_template('tracked.html', incomes=incomes)
+    return render_template('tracked.html')
+
+@app.route('/delete_entry', methods = ["POST"])
+@login_required
+def delete_entry():
+    income_id = request.form.get('income_id')
+    if not income_id:
+        flash('fail')
+        return redirect('/dashboard')
+    entry = session.query(Income).get(income_id)
+    session.delete(entry)
+    session.commit()
+    flash('entry deleted!')
+    return redirect('/dashboard')
+
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

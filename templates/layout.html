@@ -28,15 +28,15 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
           <li class="nav-item">
-            <a class="nav-link" href="/guide">How It works</a>
+            <a class="nav-link" href="/guide">About</a>
           </li>
         {% if session["user_id"] %}
+        <li class="nav-item">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </li>
           <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Zakat Due</a>
+            <a class="nav-link" href="/tracked">Zakat Due</a>
           </li> 
-          <li class="nav-item">
-            <a class="nav-link" href="/tracked">Currently tracked</a>
-          </li>
           <li class="nav-item">
             <a class="nav-link" href="/history">History</a>
           </li>
@@ -50,9 +50,6 @@
           </li>
         </ul>
         {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="/fatwa">Fatwa</a>
-          </li>
         </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">

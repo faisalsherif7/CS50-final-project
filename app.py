@@ -174,7 +174,7 @@ def history():
     return render_template('history.html')
 
 @app.route('/tracked')
-
+@login_required
 def tracked():
     return render_template('tracked.html')
 
@@ -191,7 +191,22 @@ def delete_entry():
     flash('entry deleted!')
     return redirect('/dashboard')
 
-
+@app.route('/paid', methods = ["POST"])
+@login_required
+def paid():
+    userid = flasksession.get('user_id')
+    income_id = request.form.get('income_id')
+    if not income_id:
+        flash('fail')
+        return redirect('/dashboard')
+    entry = session.query(Income).get(income_id)
+    entry.paid = True
+    next_amount = entry.amount - entry.due_amount
+    next_entry = Income(amount=next_amount, user_id=userid, due_amount= (2.5/100 * int(next_amount)))
+    session.add(next_entry)
+    session.commit()
+    flash('Amount paid; remaining amount being tracked for next hijri year!')
+    return redirect('/dashboard')
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

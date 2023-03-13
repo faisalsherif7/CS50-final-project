@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Numeric, ForeignKey, event
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, ForeignKey, event
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
@@ -23,6 +23,7 @@ class Income(Base):
     due_amount = Column(Numeric(10,2))
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="income")
+    paid = Column(Boolean, default=False)
 
 class Expenses(Base):
     __tablename__ = 'expenses'

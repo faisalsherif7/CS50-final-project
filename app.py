@@ -3,6 +3,8 @@ from flask import session as flasksession
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from datetime import datetime
+
 # imports for sqlalchemy
 from database import db_session as session
 from models import User, Income, Expenses
@@ -133,7 +135,7 @@ def guide():
 def dashboard():
     userid = flasksession.get("user_id")
     incomes = session.query(Income).filter_by(user_id=userid)
-    return render_template('dashboard.html', incomes=incomes)
+    return render_template('dashboard.html', incomes=incomes, datetime=datetime)
 
 @app.route('/settings')
 @login_required

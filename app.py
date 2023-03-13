@@ -159,13 +159,23 @@ def addmoney():
             flash("income added successfully!")
             return redirect('/dashboard')
         elif action == 'expense':
-            amount = request.form.get('expense')
+            amount = int(request.form.get('expense'))
             if not amount:
                 flash("Please enter amount!")
                 return redirect('/dashboard')
             expense = Expenses(amount=amount, user_id=userid)
             session.add(expense)
             session.commit()
+            incomes = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date.desc()).all()
+            for income in incomes:
+                if income.amount > amount:
+                    income.amount = income.amount - amount
+                    session.commit()
+                    break
+                elif income.amount < amount: 
+                    session.delete(income)
+                    amount = amount - income.amount
+                    session.commit()
             flash("expense added successfully!")
             return redirect('/dashboard')
     else:

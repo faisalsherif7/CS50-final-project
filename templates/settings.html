@@ -4,28 +4,47 @@
 
 {% block content %}
 
-<h1 class="mb-3">Delete Account</h1>
+
+<h1 class="mb-3">Change Password</h1>
+<div class="col-md-6">
+    <form action="/change_password", method="post">
+        <div class="mb-3">
+            <label class="form-label">Old Password</label>
+            <input type="password" class="form-control" name="old_password">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">New Password</label>
+            <input type="password" class="form-control" name="new_password">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" name="confirmation">
+        </div>
+        <button type="submit" class="btn btn-dark mt-2 mb-5">Change Password</button>
+    </form>
+</div>
+
+<h1 class="mb-3 mt-5">Delete Account</h1>
 <div class="col-md-6">
     <form action="/delete_account", method="post">
         <div class="mb-3">
-            <label for="exampleInputEmail1" class="form-label">Username</label>
-            <input type="text" class="form-control" id="exampleInputEmail1" name="username">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" name="username">
         </div>
         <div class="mb-3">
-            <label for="exampleInputPassword1" class="form-label">Password</label>
-            <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="password">
         </div>
-        <button type="submit" class="btn btn-primary mt-2">Delete Account</button>
+        <div class="card text-bg-danger mb-3">
+            <div class="card-header">Warning!</div>
+            <div class="card-body">
+                <h5 class="card-title">Account deletion is permanent!</h5>
+                <p class="card-text">All your data will be irrecoverably lost. Proceed with caution.</p>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-dark mt-2">Delete Account</button>
     </form>
 </div>
-<div class="col-md-6">
-    <div class="card text-bg-danger mb-3" style="max-width: 18rem;">
-        <div class="card-header">Warning!</div>
-        <div class="card-body">
-            <h5 class="card-title">Account deletion is permanent!</h5>
-            <p class="card-text">All your data will be irrecoverably lost. Proceed with caution.</p>
-        </div>
-    </div>
-</div>
+
     
 {% endblock %}

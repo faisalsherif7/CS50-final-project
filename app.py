@@ -122,7 +122,7 @@ def register():
             newuser = User(username=username, hash=hashed)
             session.add(newuser)
             session.commit()
-            return redirect("/")
+            return redirect("/login")
         else:
             return redirect("/register")
 
@@ -261,6 +261,37 @@ def delete_account():
     flash("Your account has been deleted.")
     return redirect("/")
 
+@app.route('/change_password', methods = ["POST"])
+@login_required
+def change_password():
+    old_password = request.form.get("old_password")
+    new_password = request.form.get("new_password")
+    confirmation = request.form.get("confirmation")
+    userid = flasksession.get("user_id")
+    user = session.query(User).get(userid)
+
+    # Ensure all fields are filled
+    if not old_password or not new_password or not confirmation:
+        flash('All fields are required!')
+        return redirect('/settings')
+    
+    # Ensure correct password is entered
+    if not check_password_hash(user.hash, old_password):
+        flash('Invalid password entered!')
+        return redirect('/settings')
+    
+    # Ensure passwords match
+    if new_password != confirmation:
+        flash('Passwords do not match!')
+        return redirect('/settings')
+    
+    # Change password
+    user.hash = generate_password_hash(new_password)
+    session.commit()
+    flash('Password changed successfully!')
+    return redirect('/settings')
+    
+    
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

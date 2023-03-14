@@ -1995,6 +1995,7 @@ progress {
 .form-control {
   display: block;
   width: 100%;
+  height: 3rem;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 400;
@@ -2002,7 +2003,7 @@ progress {
   color: #55595c;
   background-color: #f7f7f9;
   background-clip: padding-box;
-  border: 0 solid #ced4da;
+  border: 2 solid #ced4da;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -2555,7 +2556,7 @@ textarea.form-control-lg {
   text-align: center;
   white-space: nowrap;
   background-color: #eceeef;
-  border: 0 solid #ced4da;
+  border: 1 solid #ced4da;
 }
 
 .input-group-lg > .form-control,

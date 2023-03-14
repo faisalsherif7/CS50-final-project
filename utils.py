@@ -7,11 +7,18 @@ from functools import wraps
 from flask import redirect, session
 
 def calculate_due_date():
-        current_date = datetime.now()
-        current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
-        next_hijri_year = current_hijri_date.year + 1
-        next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
-        return next_gregorian_date
+    current_date = datetime.now()
+    current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
+    next_hijri_year = current_hijri_date.year + 1
+    next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
+    return next_gregorian_date
+
+def plus_one_hijri(input_date):
+    current_date = input_date
+    current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
+    next_hijri_year = current_hijri_date.year + 1
+    next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
+    return next_gregorian_date
 
 def login_required(f):
     @wraps(f)

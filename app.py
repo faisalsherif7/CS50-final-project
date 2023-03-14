@@ -10,7 +10,7 @@ from database import db_session as session
 from models import User, Income, Expenses
 
 # imports from util
-from utils import login_required, usd
+from utils import login_required, usd, plus_one_hijri
 
 # create the app
 app = Flask(__name__)
@@ -193,6 +193,8 @@ def tracked():
 @app.route('/delete_entry', methods = ["POST"])
 @login_required
 def delete_entry():
+
+    # Functionality to completely delete an income entry from history
     income_id = request.form.get('income_id')
     if not income_id:
         flash('fail')
@@ -214,7 +216,8 @@ def paid():
     entry = session.query(Income).get(income_id)
     entry.paid = True
     next_amount = entry.amount - entry.due_amount
-    next_entry = Income(amount=next_amount, user_id=userid, due_amount= (2.5/100 * int(next_amount)))
+    new_entry_date = entry.due_date
+    next_entry = Income(amount=next_amount, user_id=userid, date=new_entry_date, due_date=plus_one_hijri(new_entry_date), due_amount= (2.5/100 * int(next_amount)))
     session.add(next_entry)
     session.commit()
     flash('Amount paid; remaining amount being tracked for next hijri year!')

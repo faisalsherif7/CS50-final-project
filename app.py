@@ -223,6 +223,43 @@ def paid():
     flash('Amount paid; remaining amount being tracked for next hijri year!')
     return redirect('/dashboard')
 
+@app.route('/delete_account', methods = ["POST"])
+@login_required
+def delete_account():
+    userid = flasksession.get("user_id")
+    username = request.form.get("username")
+    password = request.form.get("password")
+
+    # Ensure username and password are submitted
+    if not username or not password:
+        flash("must provide username/password")
+        return redirect('/settings')
+
+    # Ensure correct username was submitted (sqlalchemy)
+    user = session.query(User).get(userid)
+    if username != user.username:
+        flash("Invalid username!")
+        return redirect('/settings')
+
+    # Ensure username exists and password is correct
+    if not user or not check_password_hash(user.hash, password):
+        flash("invalid username and/or password")
+        return redirect('/settings')
+
+    # Delete account and all data
+    flasksession.clear()
+    session.delete(user)
+    incomes = session.query(Income).filter_by(user_id=userid).all()
+    for income in incomes:
+        session.delete(income)
+    expenses = session.query(Expenses).filter_by(user_id=userid).all()
+    for expense in expenses:
+        session.delete(expense)
+    session.commit()
+    flash("Your account has been deleted.")
+    return redirect("/")
+
+
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext
 def shutdown_session(exception=None):

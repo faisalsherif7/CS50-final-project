@@ -4,8 +4,28 @@
 
 {% block content %}
 
-<p class="fs-1">
-    Account settings
-</p>
-
+<h1 class="mb-3">Delete Account</h1>
+<div class="col-md-6">
+    <form action="/delete_account", method="post">
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Username</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" name="username">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Password</label>
+            <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Delete Account</button>
+    </form>
+</div>
+<div class="col-md-6">
+    <div class="card text-bg-danger mb-3" style="max-width: 18rem;">
+        <div class="card-header">Warning!</div>
+        <div class="card-body">
+            <h5 class="card-title">Account deletion is permanent!</h5>
+            <p class="card-text">All your data will be irrecoverably lost. Proceed with caution.</p>
+        </div>
+    </div>
+</div>
+    
 {% endblock %}

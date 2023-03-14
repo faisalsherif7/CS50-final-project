@@ -217,7 +217,9 @@ def paid():
     entry.paid = True
     next_amount = entry.amount - entry.due_amount
     new_entry_date = entry.due_date
-    next_entry = Income(amount=next_amount, user_id=userid, date=new_entry_date, due_date=plus_one_hijri(new_entry_date), due_amount= (2.5/100 * int(next_amount)))
+    next_entry = Income(amount=next_amount, user_id=userid, 
+                        date=new_entry_date, due_date=plus_one_hijri(new_entry_date), 
+                        due_amount= (2.5/100 * int(next_amount)))
     session.add(next_entry)
     session.commit()
     flash('Amount paid; remaining amount being tracked for next hijri year!')

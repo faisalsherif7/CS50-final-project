@@ -4,26 +4,8 @@
 
 {% block content %}
 
-
-{% if session["user_id"] %}
-
-<h1>
-    Welcome, {{ u }}. Update your table here.
-</h1>
-<p class="fs-4">
-    Add any income entry below, and we will track it from the moment of entry for one year, upon 
-    which you will be notified to pay zakat for the amount in the 'zakat due' table.
-</p>
-
-
-
-
-
-
-{% else %}
-
 <h1 class="text-center">
-    Welcome, {{ u }}!
+    Welcome to RATIB! 
 </h1>
 <div class="fs-4">
     <p class="pt-3">
@@ -53,7 +35,5 @@
     </p>
 </div>
 
-
-{% endif %}
 
 {% endblock %}

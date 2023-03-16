@@ -135,6 +135,8 @@ def guide():
 def dashboard():
     userid = flasksession.get("user_id")
     incomes = session.query(Income).filter_by(user_id=userid)
+    if incomes.count() == 0:
+        return render_template('dashboard.html', incomes=None)
     return render_template('dashboard.html', incomes=incomes, datetime=datetime)
 
 @app.route('/settings')
@@ -152,17 +154,18 @@ def addmoney():
             amount = request.form.get('income')
             if not amount:
                 flash("Please enter amount!")
-                return redirect('/')
+                return redirect('/dashboard')
             income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)))
             session.add(income)
             session.commit()
             flash("income added successfully!")
             return redirect('/dashboard')
         elif action == 'expense':
-            amount = int(request.form.get('expense'))
-            if not amount:
+            amount_str = request.form.get('expense')
+            if not amount_str:
                 flash("Please enter amount!")
                 return redirect('/dashboard')
+            amount = int(amount_str)
             expense = Expenses(amount=amount, user_id=userid)
             session.add(expense)
             session.commit()
@@ -170,6 +173,10 @@ def addmoney():
             for income in incomes:
                 if income.amount > amount:
                     income.amount = income.amount - amount
+                    session.commit()
+                    break
+                elif income.amount == amount:
+                    session.delete(income)
                     session.commit()
                     break
                 elif income.amount < amount: 
@@ -183,12 +190,18 @@ def addmoney():
     
 @app.route('/history')
 def history():
-    return render_template('history.html')
+    incomes = session.query(Income).all()
+    expenses = session.query(Expenses).all()
+    return render_template('history.html', incomes=incomes, expenses=expenses)
 
-@app.route('/tracked')
+@app.route('/due')
 @login_required
-def tracked():
-    return render_template('tracked.html')
+def due():
+    current_date = datetime.now()
+    incomes_due = session.query(Income).filter(Income.due_date >= current_date).filter_by(paid=False)
+    if incomes_due.count() == 0:
+        return render_template('due.html', incomes=None)
+    return render_template('due.html', incomes=incomes_due)
 
 @app.route('/delete_entry', methods = ["POST"])
 @login_required

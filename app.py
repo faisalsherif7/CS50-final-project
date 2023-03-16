@@ -158,7 +158,7 @@ def addmoney():
             income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)))
             session.add(income)
             session.commit()
-            flash("income added successfully!")
+            flash("Income added")
             return redirect('/dashboard')
         elif action == 'expense':
             amount_str = request.form.get('expense')
@@ -183,7 +183,7 @@ def addmoney():
                     session.delete(income)
                     amount = amount - income.amount
                     session.commit()
-            flash("expense added successfully!")
+            flash("Expense added")
             return redirect('/dashboard')
     else:
         return redirect('/')

@@ -24,10 +24,6 @@
                     <td>{{ income.due_date }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
                     <td>
-                        <form action="/delete_entry", method="post">
-                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                            <button type="submit" class="btn btn-danger">Delete entry</button>
-                        </form>
                         <form action="/paid", method="post">
                             <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
                             <button type="submit" class="btn btn-success">Paid</button>

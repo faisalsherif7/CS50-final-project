@@ -4,6 +4,10 @@
 
 {% block content %}
 
+<p class="fs-3 mt-3 mb-5">
+    All your income/expense entries below will update the table automatically.
+</p>
+
 <form class="" action="/addmoney" method="post">
     <div class="row justify-content-center">
         <div class="form-group text-center col-auto">
@@ -44,17 +48,20 @@
                     <td>{{ income.due_date }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
                     <td>
-                        <form action="/delete_entry", method="post">
-                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                            <button type="submit" class="btn btn-danger">Delete entry</button>
-                        </form>
-                        <form action="/paid", method="post">
-                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                            {% set current_time = datetime.now() %}
-                            {% if current_time < income.due_date %}
-                            <button type="submit" class="btn btn-success">Paid</button>
-                            {% endif %}
-                        </form>
+                        <div class="row">
+                            <div class="col-auto">
+                                <form action="/modify" method="post">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-info">Modify</button>
+                                </form>
+                            </div>
+                            <div class="col-auto">
+                                <form action="/delete_entry", method="post">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
                     </td>
                 </tr> 
                 {% endif %}
@@ -64,9 +71,16 @@
 </div>
 
 {% else %}
-
-no incomes entered
-
+<div class="card justify-content-center mt-5">
+    <div class="card-header bg-dark text-center text-white">Income Table</div>
+    <div class="card-body bg-light text-center">
+        <p class="fs-3">
+            There are no current entries to display. 
+            To begin tracking your finances, please add an income entry using the form provided.
+        </p>
+    </div>
+</div>
+    
 {% endif %}
 
 {% endblock %}

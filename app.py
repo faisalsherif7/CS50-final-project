@@ -136,7 +136,7 @@ def dashboard():
     userid = flasksession.get("user_id")
     incomes = session.query(Income).filter_by(user_id=userid)
     if incomes.count() == 0:
-        return render_template('dashboard.html', incomes=None)
+        return render_template('dashboard.html', incomes=None, datetime=datetime)
     return render_template('dashboard.html', incomes=incomes, datetime=datetime)
 
 @app.route('/settings')
@@ -152,10 +152,16 @@ def addmoney():
         userid = flasksession.get("user_id")
         if action == 'income':
             amount = request.form.get('income')
+            date_input = request.form.get('date')
+            try:
+                date = datetime.strptime(date_input, '%Y-%m-%d')
+            except ValueError:
+                flash("A valid date must be entered. Do not attempt to modify HTML file.")
+                return redirect('/dashboard')
             if not amount:
                 flash("Please enter amount!")
                 return redirect('/dashboard')
-            income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)))
+            income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)), date=date, due_date=plus_one_hijri(date))
             session.add(income)
             session.commit()
             flash("Income added")
@@ -198,7 +204,7 @@ def history():
 @login_required
 def due():
     current_date = datetime.now()
-    incomes_due = session.query(Income).filter(Income.due_date >= current_date).filter_by(paid=False)
+    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False)
     if incomes_due.count() == 0:
         return render_template('due.html', incomes=None)
     return render_template('due.html', incomes=incomes_due)
@@ -303,7 +309,6 @@ def change_password():
     session.commit()
     flash('Password changed successfully!')
     return redirect('/settings')
-    
     
 
 # SQLAlchemy - Flask removes database sessions at end of request

@@ -196,9 +196,11 @@ def addmoney():
     
 @app.route('/history')
 def history():
-    incomes = session.query(Income).all()
-    expenses = session.query(Expenses).all()
-    return render_template('history.html', incomes=incomes, expenses=expenses)
+    userid = flasksession.get('user_id')
+    incomes = session.query(Income).filter_by(user_id=userid).all()
+    expenses = session.query(Expenses).filter_by(user_id=userid).all()
+    paid = session.query(Income).filter_by(user_id=userid, paid=True).all()
+    return render_template('history.html', incomes=incomes, expenses=expenses, paid=paid)
 
 @app.route('/due')
 @login_required

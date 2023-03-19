@@ -150,14 +150,14 @@ def addmoney():
     if request.method == "POST":
         action = request.form.get('action')
         userid = flasksession.get("user_id")
+        date_input = request.form.get('date')
+        try:
+            date = datetime.strptime(date_input, '%Y-%m-%d')
+        except ValueError:
+            flash("A valid date must be entered. Do not attempt to modify HTML file.")
+            return redirect('/dashboard')
         if action == 'income':
             amount = request.form.get('income')
-            date_input = request.form.get('date')
-            try:
-                date = datetime.strptime(date_input, '%Y-%m-%d')
-            except ValueError:
-                flash("A valid date must be entered. Do not attempt to modify HTML file.")
-                return redirect('/dashboard')
             if not amount:
                 flash("Please enter amount!")
                 return redirect('/dashboard')
@@ -172,10 +172,10 @@ def addmoney():
                 flash("Please enter amount!")
                 return redirect('/dashboard')
             amount = int(amount_str)
-            expense = Expenses(amount=amount, user_id=userid)
+            expense = Expenses(amount=amount, user_id=userid, date=date)
             session.add(expense)
             session.commit()
-            incomes = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date.desc()).all()
+            incomes = session.query(Income).filter_by(user_id=userid, paid=False).filter(Income.date <= date).order_by(Income.date.desc()).all()
             for income in incomes:
                 if income.amount > amount:
                     income.amount = income.amount - amount

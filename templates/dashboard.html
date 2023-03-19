@@ -6,18 +6,20 @@
 
 <h1 class="mb-4"> Add Income/Expense </h1>
 <form class="" action="/addmoney" method="post">
-    <div class="row">
+    <div class="row justify-content-center">
+        <div class="form-group col-auto">
+            <div class="input-group datepicker">
+                {% set current_date = datetime.strftime(datetime.now(), '%Y-%m-%d') %}
+                <input type="date" class="form-control" id="datepicker" name="date" value="{{ current_date }}" required>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
         <div class="form-group col-auto">
             <div class="input-group">
                 <span class="input-group-text">$</span>
                 <input autocomplete="off" class="form-control mx-auto" type="number" name="income" id="money" placeholder="Enter income amount"> 
                 <button class="btn btn-dark" type="submit" name="action" value="income">Add income</button>
-            </div>
-        </div>
-        <div class="form-group col-auto">
-            <div class="input-group datepicker">
-                {% set current_date = datetime.strftime(datetime.now(), '%Y-%m-%d') %}
-                <input type="date" class="form-control" id="datepicker" name="date" value="{{ current_date }}" required>
             </div>
         </div>
         <div class="form-group col-auto">
@@ -29,8 +31,9 @@
         </div>
     </div>
 </form>
-<p class="fs-3 mt-3 mb-3">
-    All your income/expense entries will be reflected in the table below. 
+<p class="fs-5 mt-3 mb-3 text-center">
+    All your income entries will be reflected in the table below. Expense entries will be automatically subtracted. See <a href="/guide">About</a>
+    for more info.
 </p>
 
 {% if incomes %}
@@ -46,12 +49,12 @@
                 <th>Modify</th>
             </thead>
             <tbody class="table-info">
-                {% for income in incomes %}
+                {% for income in incomes | sort(attribute='date') %}
                 {% if income.paid == False %}
                 <tr>
-                    <td>{{ income.date }}</td>
+                    <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
-                    <td>{{ income.due_date }}</td>
+                    <td>{{ income.due_date.date() }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
                     <td>
                         <div class="row">

@@ -279,7 +279,8 @@ def delete_account():
     for expense in expenses:
         session.delete(expense)
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
-    session.delete(nisab)
+    if nisab != None:
+        session.delete(nisab)
     session.commit()
     flash("Your account has been deleted.")
     return redirect("/")

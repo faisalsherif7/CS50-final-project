@@ -311,7 +311,16 @@ def change_password():
     session.commit()
     flash('Password changed successfully!')
     return redirect('/settings')
-    
+
+@app.route('/nisab', methods = ["GET", "POST"])
+@login_required
+def nisab():
+    if request.method == "GET":
+        nisab = 0
+        return render_template('nisab.html', nisab=nisab)
+    if request.method == "POST":
+        nisab = request.form.get("nisab")
+        return reditect('/nisab')
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

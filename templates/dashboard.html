@@ -46,9 +46,9 @@
                 <th>Amount</th>
                 <th>Date Due</th>
                 <th>Due Amount</th>
-                <th>Modify</th>
+                <th></th>
             </thead>
-            <tbody class="table-info">
+            <tbody class="table-info text-center justify-content-center">
                 {% for income in incomes | sort(attribute='date') %}
                 {% if income.paid == False %}
                 <tr>

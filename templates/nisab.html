@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block title %}History{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4"> Set Nisab </h1>
+<form class="" action="/nisab" method="post">
+    <div class="row">
+        <div class="form-group col-auto">
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input autocomplete="off" class="form-control mx-auto" type="number" name="nisab" id="money" placeholder="Enter amount"> 
+                <button class="btn btn-dark" type="submit" name="action" value="income">Set Nisab</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+Current nisab = {{ nisab }}
+
+{% endblock %}

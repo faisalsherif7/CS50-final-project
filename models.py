@@ -13,6 +13,7 @@ class User(Base):
     hash = Column(String, nullable=False)
     income = relationship("Income", back_populates="user")
     expenses = relationship("Expenses", back_populates="user")
+    nisab = relationship("Nisab", back_populates="user")
     
 class Income(Base):
     __tablename__ = 'income'
@@ -33,5 +34,10 @@ class Expenses(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="expenses")
 
-    
+class Nisab(Base):
+    __tablename__ = 'nisab'
+    id = Column(Integer, primary_key=True)
+    amount = Column(Numeric(10,2))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    user = relationship("User", back_populates="nisab")
 

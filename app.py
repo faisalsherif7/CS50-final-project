@@ -7,7 +7,7 @@ from datetime import datetime
 
 # imports for sqlalchemy
 from database import db_session as session
-from models import User, Income, Expenses
+from models import User, Income, Expenses, Nisab
 
 # imports from util
 from utils import login_required, usd, plus_one_hijri
@@ -315,12 +315,22 @@ def change_password():
 @app.route('/nisab', methods = ["GET", "POST"])
 @login_required
 def nisab():
+    userid = flasksession.get("user_id")
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
     if request.method == "GET":
-        nisab = 0
-        return render_template('nisab.html', nisab=nisab)
+        if nisab == None:
+            return render_template('nisab.html', nisab=0)
+        return render_template('nisab.html', nisab=nisab.amount)
     if request.method == "POST":
-        nisab = request.form.get("nisab")
-        return reditect('/nisab')
+        nisab_new = request.form.get("nisab")
+        if not nisab:
+            enter_nisab = Nisab(amount=nisab_new, user_id=userid)
+            session.add(enter_nisab)
+            session.commit()
+        else:
+            nisab.amount = nisab_new
+            session.commit()
+        return redirect('/nisab')
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

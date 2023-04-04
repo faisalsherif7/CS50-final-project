@@ -395,12 +395,11 @@ def nisab():
         # If nisab is being changed.
         else:
 
-
             # If savings were above nisab threshold previously, then we work on the Income table.
             if nisab.nisab_reached == True:
                 total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
 
-                # If no savings, simply update nisab.
+                # If no savings, simply update nisab and return function.
                 if total_before == None:
                     nisab.amount = nisab_new
                     nisab.nisab_reached == False
@@ -426,7 +425,7 @@ def nisab():
             elif nisab.nisab_reached == False:
                 total_before = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
 
-                # If no savings, simply update nisab.
+                # If no savings, simply update nisab and return function.
                 if total_before == None:
                     nisab.amount = nisab_new
                     nisab.nisab_reached == False

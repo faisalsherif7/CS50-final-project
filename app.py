@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, flash, jsonify
 from flask import session as flasksession
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from datetime import datetime
 
 # imports for sqlalchemy
@@ -11,7 +10,8 @@ from models import User, Income, Expenses, Nisab, Untracked_Income
 from sqlalchemy import func
 
 # imports from util
-from utils import login_required, usd, plus_one_hijri
+from utils import login_required, usd, plus_one_hijri, isfloat
+
 
 # create the app
 app = Flask(__name__)
@@ -67,18 +67,6 @@ def login():
             return redirect("/login")
 
 
-@app.route('/')
-@app.route('/home')
-def index():
-    if flasksession.get("user_id"):
-        userid = flasksession.get("user_id")
-        user = session.query(User).filter_by(id=userid).first()
-        username = user.username if user else None
-        return render_template("home.html", u = username)
-    else:
-        return render_template("home.html", u = 'random user')
-
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -132,6 +120,18 @@ def register():
             return redirect("/register")
 
 
+@app.route('/')
+@app.route('/home')
+def index():
+    if flasksession.get("user_id"):
+        userid = flasksession.get("user_id")
+        user = session.query(User).filter_by(id=userid).first()
+        username = user.username if user else None
+        return render_template("home.html", u = username)
+    else:
+        return render_template("home.html", u = 'random user')
+
+
 @app.route('/guide')
 def guide():
     return render_template('guide.html')
@@ -168,9 +168,17 @@ def addmoney():
         
         # If user inputs income
         if action == 'income':
+
+            # Check for valid amount entry
             amount = request.form.get('income')
             if not amount:
                 flash("Please enter amount!")
+                return redirect('/dashboard')
+            if not isfloat(amount):
+                flash('Please enter valid amount!')
+                return redirect('/dashboard')
+            if float(amount) <= 0:
+                flash('Please enter valid amount!')
                 return redirect('/dashboard')
             
             # First, obtain nisab value. If no nisab value is found, then prompt user to add a nisab value first.
@@ -247,6 +255,101 @@ def addmoney():
     else:
         return redirect('/')
     
+
+@app.route('/nisab', methods = ["GET", "POST"])
+@login_required
+def nisab():
+    userid = flasksession.get("user_id")
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
+    if request.method == "GET":
+        if nisab == None:
+            return render_template('nisab.html', nisab=0)
+        return render_template('nisab.html', nisab=nisab.amount)
+    
+    # If user entered a nisab amount.
+    if request.method == "POST":
+
+        # Ensure valid nisab entry
+        nisab_new_string = request.form.get("nisab")
+        if not isfloat(nisab_new_string):
+            flash('Please enter valid nisab amount!')
+            return redirect('/nisab')
+        nisab_new = float(nisab_new_string)
+        if nisab_new <= 0:
+            flash('Please enter valid nisab amount')
+            return redirect('/nisab')
+
+        # If nisab wasn't set before.
+        if not nisab:
+            enter_nisab = Nisab(amount=nisab_new, user_id=userid)
+            session.add(enter_nisab)
+            session.commit()
+            flash('Nisab set successfully.')
+
+        # If nisab is being changed.
+        else:
+
+            # If savings were above nisab threshold previously, then we work on the Income table.
+            if nisab.nisab_reached == True:
+                total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
+
+                # If no savings, simply update nisab and return function.
+                if total_before == None:
+                    nisab.amount = nisab_new
+                    nisab.nisab_reached = False
+                    session.commit()
+                    flash('Nisab updated.')
+                    return redirect('/nisab')
+
+                # If savings are still above updated nisab, do nothing.
+                if total_before >= nisab_new:
+                    flash('Nisab updated. Your savings still cross the nisab threshold and are tracked for zakat.')
+                
+                # If savings dip below updated nisab, change previous savings sum to untracked_income table and stop tracking.
+                elif total_before < nisab_new:
+                    stop_tracking = Untracked_Income(amount=total_before, user_id=userid)
+                    session.add(stop_tracking)
+                    incomes = session.query(Income).filter_by(user_id=userid, paid=False).all()
+                    for income in incomes:
+                        session.delete(income)
+                    nisab.nisab_reached = False
+                    flash('Nisab updated. Your savings have dipped below the updated nisab amount and are now not tracked for zakat.')
+                    flash('Your savings will begin being tracked if they cross the nisab threshold in the future.')
+            
+            # If savings were below the previous nisab threshold, then we work on the Untracked Income table.
+            elif nisab.nisab_reached == False:
+                total_before = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
+
+                # If no savings, simply update nisab and return function.
+                if total_before == None:
+                    nisab.amount = nisab_new
+                    nisab.nisab_reached = False
+                    session.commit()
+                    flash('Nisab updated.')
+                    return redirect('/nisab')
+
+                # If savings are still below updated nisab, do nothing.
+                if total_before < nisab_new:
+                    flash('Nisab updated. Your savings are still below the nisab threshold and are not tracked for zakat.')
+
+                # If savings cross updated nisab threshold, change savings to income table and start tracking.
+                elif total_before >= nisab_new:
+                    date_now = datetime.now().strftime('%Y-%m-%d')
+                    date = datetime.strptime(date_now, '%Y-%m-%d')
+                    start_tracking = Income(amount=total_before, user_id=userid, due_amount= (2.5/100 * int(total_before)), date=date, due_date=plus_one_hijri(date))
+                    session.add(start_tracking)
+                    incomes = session.query(Untracked_Income).filter_by(user_id=userid).all()
+                    for income in incomes:
+                        session.delete(income)
+                    nisab.nisab_reached = True
+                    flash('Nisab updated. Your savings now cross the updated nisab threshold and are now tracked for zakat.')
+                
+            # Update nisab. 
+            nisab.amount = nisab_new
+            session.commit()
+        return redirect('/nisab')
+    
+
 @app.route('/history')
 def history():
     userid = flasksession.get('user_id')
@@ -324,11 +427,14 @@ def delete_account():
         flash("invalid username and/or password")
         return redirect('/settings')
 
-    # Delete account and all data
+    # Delete account and all data:-
     flasksession.clear()
     session.delete(user)
     incomes = session.query(Income).filter_by(user_id=userid).all()
     for income in incomes:
+        session.delete(income)
+    untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).all()
+    for income in untracked_incomes:
         session.delete(income)
     expenses = session.query(Expenses).filter_by(user_id=userid).all()
     for expense in expenses:
@@ -370,88 +476,6 @@ def change_password():
     session.commit()
     flash('Password changed successfully!')
     return redirect('/settings')
-
-
-@app.route('/nisab', methods = ["GET", "POST"])
-@login_required
-def nisab():
-    userid = flasksession.get("user_id")
-    nisab = session.query(Nisab).filter_by(user_id=userid).first()
-    if request.method == "GET":
-        if nisab == None:
-            return render_template('nisab.html', nisab=0)
-        return render_template('nisab.html', nisab=nisab.amount)
-    
-    # If user entered a nisab amount.
-    if request.method == "POST":
-        nisab_new = int(request.form.get("nisab"))
-
-        # If nisab wasn't set before.
-        if not nisab:
-            enter_nisab = Nisab(amount=nisab_new, user_id=userid)
-            session.add(enter_nisab)
-            session.commit()
-
-        # If nisab is being changed.
-        else:
-
-            # If savings were above nisab threshold previously, then we work on the Income table.
-            if nisab.nisab_reached == True:
-                total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
-
-                # If no savings, simply update nisab and return function.
-                if total_before == None:
-                    nisab.amount = nisab_new
-                    nisab.nisab_reached == False
-                    session.commit()
-                    return redirect('/nisab')
-
-                # If savings are still above updated nisab, do nothing.
-                if total_before >= nisab_new:
-                    flash('Nisab updated. Your savings still cross the nisab threshold and are tracked for zakat.')
-                
-                # If savings dip below updated nisab, change previous savings sum to untracked_income table and stop tracking.
-                elif total_before < nisab_new:
-                    stop_tracking = Untracked_Income(amount=total_before, user_id=userid)
-                    session.add(stop_tracking)
-                    incomes = session.query(Income).filter_by(user_id=userid).all()
-                    for income in incomes:
-                        session.delete(income)
-                    nisab.nisab_reached = False
-                    flash('Nisab updated. Your savings have dipped below the updated nisab amount and are now not tracked for zakat.')
-                    flash('Your savings will begin being tracked if they cross the nisab threshold in the future.')
-            
-            # If savings were below the previous nisab threshold, then we work on the Untracked Income table.
-            elif nisab.nisab_reached == False:
-                total_before = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
-
-                # If no savings, simply update nisab and return function.
-                if total_before == None:
-                    nisab.amount = nisab_new
-                    nisab.nisab_reached == False
-                    session.commit()
-                    return redirect('/nisab')
-
-                # If savings are still below updated nisab, do nothing.
-                if total_before < nisab_new:
-                    flash('Nisab updated. Your savings are still below the nisab threshold and are not tracked for zakat.')
-
-                # If savings cross updated nisab threshold, change savings to income table and start tracking.
-                elif total_before >= nisab_new:
-                    date_now = datetime.now().strftime('%Y-%m-%d')
-                    date = datetime.strptime(date_now, '%Y-%m-%d')
-                    start_tracking = Income(amount=total_before, user_id=userid, due_amount= (2.5/100 * int(total_before)), date=date, due_date=plus_one_hijri(date))
-                    session.add(start_tracking)
-                    incomes = session.query(Untracked_Income).filter_by(user_id=userid).all()
-                    for income in incomes:
-                        session.delete(income)
-                    nisab.nisab_reached = True
-                    flash('Nisab updated. Your savings now cross the updated nisab threshold and are now tracked for zakat.')
-                
-            # Update nisab. 
-            nisab.amount = nisab_new
-            session.commit()
-        return redirect('/nisab')
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

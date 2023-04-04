@@ -187,7 +187,7 @@ def addmoney():
                 flash("Please set a nisab value before adding an income")
                 return redirect('/dashboard')
             
-            # Check if the current income total (including current entry) reaches nisab.
+            # Check if nisab has been reached by current savings.
             check = nisab.nisab_reached
 
             # If nisab reached, this means the income table is to be added to.
@@ -195,7 +195,7 @@ def addmoney():
                 income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)), date=date, due_date=plus_one_hijri(date))
                 session.add(income)
                 session.commit()
-                flash("Income added")
+                flash("Income added. Your savings cross the nisab threshold and are being tracked for zakat.")
                 return redirect('/dashboard')
         
             # If nisab not reached, get amount from untracked income table, check for nisab threshold, and add to corresponding table.
@@ -291,7 +291,7 @@ def nisab():
 
             # If savings were above nisab threshold previously, then we work on the Income table.
             if nisab.nisab_reached == True:
-                total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
+                total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
 
                 # If no savings, simply update nisab and return function.
                 if total_before == None:
@@ -350,6 +350,45 @@ def nisab():
         return redirect('/nisab')
     
 
+@app.route('/paid', methods = ["POST"])
+@login_required
+def paid():
+    userid = flasksession.get('user_id')
+    income_id = request.form.get('income_id')
+
+    # Update income entry as paid
+    entry = session.query(Income).get(income_id)
+    entry.paid = True
+
+    # Add remaining amount to savings
+    next_amount = entry.amount - entry.due_amount
+    new_entry_date = entry.due_date
+    next_entry = Income(amount=next_amount, user_id=userid, 
+                        date=new_entry_date, due_date=plus_one_hijri(new_entry_date), 
+                        due_amount= (2.5/100 * int(next_amount)))
+    session.add(next_entry)
+    session.commit()
+
+    # If remaining savings are above nisab, do nothing.
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
+    remaining_savings = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
+    if remaining_savings >= nisab.amount:
+        flash('Zakat paid; your remaining savings cross the nisab threshold, and so are being tracked for next hijri year.')
+        return redirect('/dashboard')
+    
+    # If remaining savings dip below nisab, change tables and stop tracking.
+    elif remaining_savings < nisab.amount:
+        stop_tracking = Untracked_Income(amount=remaining_savings, user_id=userid)
+        session.add(stop_tracking)
+        incomes = session.query(Income).filter_by(user_id=userid, paid=False).all()
+        for income in incomes:
+            session.delete(income)
+        nisab.nisab_reached = False
+        session.commit()
+        flash('Zakat paid; your remaining savings are below the nisab, and are therefore not being tracked.')
+        return redirect('/dashboard')
+
+
 @app.route('/history')
 def history():
     userid = flasksession.get('user_id')
@@ -380,27 +419,6 @@ def delete_entry():
     session.delete(entry)
     session.commit()
     flash('entry deleted!')
-    return redirect('/dashboard')
-
-
-@app.route('/paid', methods = ["POST"])
-@login_required
-def paid():
-    userid = flasksession.get('user_id')
-    income_id = request.form.get('income_id')
-    if not income_id:
-        flash('fail')
-        return redirect('/dashboard')
-    entry = session.query(Income).get(income_id)
-    entry.paid = True
-    next_amount = entry.amount - entry.due_amount
-    new_entry_date = entry.due_date
-    next_entry = Income(amount=next_amount, user_id=userid, 
-                        date=new_entry_date, due_date=plus_one_hijri(new_entry_date), 
-                        due_amount= (2.5/100 * int(next_amount)))
-    session.add(next_entry)
-    session.commit()
-    flash('Amount paid; remaining amount being tracked for next hijri year!')
     return redirect('/dashboard')
 
 

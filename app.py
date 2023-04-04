@@ -7,7 +7,8 @@ from datetime import datetime
 
 # imports for sqlalchemy
 from database import db_session as session
-from models import User, Income, Expenses, Nisab
+from models import User, Income, Expenses, Nisab, Untracked_Income
+from sqlalchemy import func
 
 # imports from util
 from utils import login_required, usd, plus_one_hijri
@@ -23,6 +24,7 @@ app.jinja_env.filters["usd"] = usd
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -64,6 +66,7 @@ def login():
         else:
             return redirect("/login")
 
+
 @app.route('/')
 @app.route('/home')
 def index():
@@ -75,6 +78,7 @@ def index():
     else:
         return render_template("home.html", u = 'random user')
 
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -82,6 +86,7 @@ def logout():
     # Forget any user_id
     flasksession.clear()
     return redirect('/')
+
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
@@ -126,9 +131,11 @@ def register():
         else:
             return redirect("/register")
 
+
 @app.route('/guide')
 def guide():
     return render_template('guide.html')
+
 
 @app.route('/dashboard')
 @login_required
@@ -139,10 +146,12 @@ def dashboard():
         return render_template('dashboard.html', incomes=None, datetime=datetime)
     return render_template('dashboard.html', incomes=incomes, datetime=datetime)
 
+
 @app.route('/settings')
 @login_required
 def settings():
     return render_template('settings.html')
+
 
 @app.route('/addmoney', methods=["GET", "POST"])
 @login_required
@@ -156,16 +165,60 @@ def addmoney():
         except ValueError:
             flash("A valid date must be entered. Do not attempt to modify HTML file.")
             return redirect('/dashboard')
+        
+        # If user inputs income
         if action == 'income':
             amount = request.form.get('income')
             if not amount:
                 flash("Please enter amount!")
                 return redirect('/dashboard')
-            income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)), date=date, due_date=plus_one_hijri(date))
-            session.add(income)
-            session.commit()
-            flash("Income added")
-            return redirect('/dashboard')
+            
+            # First, obtain nisab value. If no nisab value is found, then prompt user to add a nisab value first.
+            nisab = session.query(Nisab).filter_by(user_id=userid).first()
+            if nisab == None:
+                flash("Please set a nisab value before adding an income")
+                return redirect('/dashboard')
+            
+            # Check if the current income total (including current entry) reaches nisab.
+            check = nisab.nisab_reached
+
+            # If nisab reached, this means the income table is to be added to.
+            if check == True:
+                income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)), date=date, due_date=plus_one_hijri(date))
+                session.add(income)
+                session.commit()
+                flash("Income added")
+                return redirect('/dashboard')
+        
+            # If nisab not reached, get amount from untracked income table, check for nisab threshold, and add to corresponding table.
+            else:
+                total_before = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
+                if total_before == None:
+                    total_now = int(amount)
+                else:
+                    total_now = int(total_before) + int(amount)
+
+                # If nisab threshold not reached even after new entry.
+                if total_now < nisab.amount:
+                    income = Untracked_Income(amount=amount, user_id=userid, date=date)
+                    session.add(income)
+                    session.commit()
+                    flash("Income added. You have not crossed the nisab threshold yet, so the amount is not being tracked for zakat.")
+                    return redirect('/dashboard')
+                
+                # If nisab threshold reached on new income entry.
+                elif total_now >= nisab.amount:
+                    income = Income(amount=total_now, user_id=userid, due_amount= (2.5/100 * int(total_now)), date=date, due_date=plus_one_hijri(date))
+                    session.add(income)
+                    delete_untracked = session.query(Untracked_Income).filter_by(user_id=userid).all()
+                    for entry in delete_untracked:
+                        session.delete(entry)
+                    nisab.nisab_reached = True
+                    session.commit()
+                    flash("Income added. You have crossed the nisab threshold. Your zakat year begins now.")
+                    return redirect('/dashboard')
+
+        # If "expense" was the input action
         elif action == 'expense':
             amount_str = request.form.get('expense')
             if not amount_str:
@@ -226,6 +279,7 @@ def delete_entry():
     flash('entry deleted!')
     return redirect('/dashboard')
 
+
 @app.route('/paid', methods = ["POST"])
 @login_required
 def paid():
@@ -245,6 +299,7 @@ def paid():
     session.commit()
     flash('Amount paid; remaining amount being tracked for next hijri year!')
     return redirect('/dashboard')
+
 
 @app.route('/delete_account', methods = ["POST"])
 @login_required
@@ -285,6 +340,7 @@ def delete_account():
     flash("Your account has been deleted.")
     return redirect("/")
 
+
 @app.route('/change_password', methods = ["POST"])
 @login_required
 def change_password():
@@ -315,6 +371,7 @@ def change_password():
     flash('Password changed successfully!')
     return redirect('/settings')
 
+
 @app.route('/nisab', methods = ["GET", "POST"])
 @login_required
 def nisab():
@@ -334,6 +391,7 @@ def nisab():
             nisab.amount = nisab_new
             session.commit()
         return redirect('/nisab')
+
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

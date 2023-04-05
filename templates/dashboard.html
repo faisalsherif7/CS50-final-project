@@ -40,7 +40,7 @@
 
 <div class="table-responsive">
     <table class="table table-bordered mt-3">
-        <h1 class="mt-3 text-center"> Income </h1>
+        <h1 class="mt-3 text-center"> Savings </h1>
         <thead class="table-dark text-center">
                 <th>Date added</th>
                 <th>Amount</th>
@@ -79,7 +79,45 @@
     </table>
 </div>
 
+{% elif untracked_incomes %}
+
+<div class="table-responsive">
+    <table class="table table-bordered mt-3">
+        <h1 class="mt-3 text-center"> Savings (Untracked) </h1>
+        <thead class="table-dark text-center">
+                <th>Date added</th>
+                <th>Amount</th>
+                <th></th>
+            </thead>
+            <tbody class="table-info text-center justify-content-center">
+                {% for income in untracked_incomes | sort(attribute='date') %}
+                <tr>
+                    <td>{{ income.date.date() }}</td>
+                    <td>{{ income.amount | usd}}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-auto">
+                                <form action="/modify" method="post">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-info">Modify</button>
+                                </form>
+                            </div>
+                            <div class="col-auto">
+                                <form action="/delete_entry", method="post">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                </tr> 
+                {% endfor %}
+            </tbody>
+    </table>
+</div>
+
 {% else %}
+
 <div class="card justify-content-center mt-5">
     <div class="card-header bg-dark text-center text-white">Income Table</div>
     <div class="card-body bg-light text-center">

@@ -120,6 +120,7 @@ def register():
             newuser = User(username=username, hash=hashed)
             session.add(newuser)
             session.commit()
+            flash('Account created successfully. You can log in now.')
             return redirect("/login")
         else:
             return redirect("/register")
@@ -147,9 +148,12 @@ def guide():
 def dashboard():
     userid = flasksession.get("user_id")
     incomes = session.query(Income).filter_by(user_id=userid)
-    if incomes.count() == 0:
-        return render_template('dashboard.html', incomes=None, datetime=datetime)
-    return render_template('dashboard.html', incomes=incomes, datetime=datetime)
+    if incomes.count() != 0:
+        return render_template('dashboard.html', incomes=incomes, datetime=datetime)
+    untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid)
+    if untracked_incomes.count() != 0:
+        return render_template('dashboard.html', untracked_incomes=untracked_incomes, datetime=datetime)
+    return render_template('dashboard.html', incomes=None, datetime=datetime)
 
 
 @app.route('/settings')
@@ -414,17 +418,41 @@ def due():
 @app.route('/delete_entry', methods = ["POST"])
 @login_required
 def delete_entry():
+    userid = flasksession.get("user_id")
 
     # Functionality to completely delete an income entry from history
     income_id = request.form.get('income_id')
-    if not income_id:
-        flash('fail')
-        return redirect('/dashboard')
-    entry = session.query(Income).get(income_id)
+    entry = session.query(Income).get(int(income_id))
     session.delete(entry)
     session.commit()
-    flash('entry deleted!')
-    return redirect('/dashboard')
+
+    # Check if remaining amount is above/below nisab
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
+    remaining_savings = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
+
+    # If no remaining savings, say so.
+    if remaining_savings == None:
+        flash('Entry deleted. You have no remaining savings.')
+        nisab.nisab_reached = False
+        return redirect('/dashboard')
+    
+    # If still above nisab, do nothing
+    if remaining_savings >= nisab.amount:
+        flash('Entry deleted. Your remaining savings still cross the nisab threshold and zakat is still due.')
+        return redirect('/dashboard')
+    
+    # If remaining savings dip below nisab, change tables and stop tracking.
+    elif remaining_savings < nisab.amount:
+        stop_tracking = Untracked_Income(amount=remaining_savings, user_id=userid)
+        session.add(stop_tracking)
+        incomes = session.query(Income).filter_by(user_id=userid, paid=False).all()
+        for income in incomes:
+            session.delete(income)
+        nisab.nisab_reached = False
+        session.commit()
+        flash('Entry deleted. Your remaining savings are below the nisab, and are therefore not being tracked.')
+        return redirect('/dashboard')
+    
 
 
 @app.route('/delete_account', methods = ["POST"])

@@ -61,13 +61,13 @@
                             <div class="col-auto">
                                 <form action="/modify" method="post">
                                     <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-info">Modify</button>
+                                    <button type="submit" class="btn btn-info" name="action" value="tracked">Modify</button>
                                 </form>
                             </div>
                             <div class="col-auto">
                                 <form action="/delete_entry", method="post">
                                     <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <button type="submit" class="btn btn-danger" name="action" value="tracked">Delete</button>
                                 </form>
                             </div>
                         </div>
@@ -99,13 +99,13 @@
                             <div class="col-auto">
                                 <form action="/modify" method="post">
                                     <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-info">Modify</button>
+                                    <button type="submit" class="btn btn-info" name="action" value="untracked">Modify</button>
                                 </form>
                             </div>
                             <div class="col-auto">
                                 <form action="/delete_entry", method="post">
                                     <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                    <button type="submit" class="btn btn-danger" name="action" value="untracked">Delete</button>
                                 </form>
                             </div>
                         </div>

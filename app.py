@@ -235,7 +235,7 @@ def addmoney():
                     flash("Income added. You have crossed the nisab threshold. Your zakat year begins now.")
                     return redirect('/dashboard')
 
-        # If "expense" was the input action
+        # If user input "expense"
         elif action == 'expense':
             amount_str = request.form.get('expense')
             if not amount_str:
@@ -396,29 +396,22 @@ def paid():
         session.commit()
         flash('Zakat paid; your remaining savings are below the nisab, and are therefore not being tracked.')
         return redirect('/dashboard')
-
-
-@app.route('/history')
-def history():
-    userid = flasksession.get('user_id')
-    incomes = session.query(Income).filter_by(user_id=userid).all()
-    expenses = session.query(Expenses).filter_by(user_id=userid).all()
-    paid = session.query(Income).filter_by(user_id=userid, paid=True).all()
-    return render_template('history.html', incomes=incomes, expenses=expenses, paid=paid)
-
-@app.route('/due')
-@login_required
-def due():
-    current_date = datetime.now()
-    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False)
-    if incomes_due.count() == 0:
-        return render_template('due.html', incomes=None)
-    return render_template('due.html', incomes=incomes_due)
+    
 
 @app.route('/delete_entry', methods = ["POST"])
 @login_required
 def delete_entry():
     userid = flasksession.get("user_id")
+    action = request.form.get("action")
+
+    # If user deletes from untracked table
+    if action == 'untracked':
+        income_id = request.form.get('income_id')
+        entry = session.query(Untracked_Income).get(income_id)
+        session.delete(entry)
+        session.commit()
+        flash('Entry deleted.')
+        return redirect('/dashboard')
 
     # Functionality to completely delete an income entry from history
     income_id = request.form.get('income_id')
@@ -454,6 +447,31 @@ def delete_entry():
         return redirect('/dashboard')
     
 
+@app.route('/modify')
+def modify():
+    return None
+
+
+@app.route('/history')
+def history():
+    userid = flasksession.get('user_id')
+    incomes = session.query(Income).filter_by(user_id=userid).all()
+    expenses = session.query(Expenses).filter_by(user_id=userid).all()
+    paid = session.query(Income).filter_by(user_id=userid, paid=True).all()
+    return render_template('history.html', incomes=incomes, expenses=expenses, paid=paid)
+
+
+@app.route('/due')
+@login_required
+def due():
+
+    # Display zakat due, if any, as of now
+    current_date = datetime.now()
+    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False)
+    if incomes_due.count() == 0:
+        return render_template('due.html', incomes=None)
+    return render_template('due.html', incomes=incomes_due)
+    
 
 @app.route('/delete_account', methods = ["POST"])
 @login_required
@@ -467,7 +485,7 @@ def delete_account():
         flash("must provide username/password")
         return redirect('/settings')
 
-    # Ensure correct username was submitted (sqlalchemy)
+    # Ensure correct username was submitted 
     user = session.query(User).get(userid)
     if username != user.username:
         flash("Invalid username!")
@@ -478,7 +496,7 @@ def delete_account():
         flash("invalid username and/or password")
         return redirect('/settings')
 
-    # Delete account and all data:-
+    # Delete account and all data
     flasksession.clear()
     session.delete(user)
     incomes = session.query(Income).filter_by(user_id=userid).all()

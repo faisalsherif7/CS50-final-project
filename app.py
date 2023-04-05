@@ -82,6 +82,8 @@ def register():
         return render_template('register.html')
     elif request.method == "POST":
         tracker = 0
+
+        # Check for valid entries
         username = request.form.get("username")
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
@@ -90,26 +92,29 @@ def register():
             tracker = 1 
         elif not password:
             flash("Please enter password!")
-            tracker = 2
+            tracker = 1
         elif not confirmation:
             flash("Please confirm password!")
-            tracker = 2
-        if len(password) < 8:
-            if tracker == 2:
-                flash("Password must contain a minimum of 8 characters!")
-                tracker = 1
-        if str.isalpha(password):
-            if tracker == 2:
-                flash("Password must contain at least 1 number or special character!")
-                tracker = 1
-        if tracker == 4:
+            tracker = 1
+        if tracker == 0:
             if password != confirmation:
                 flash("Passwords do not match!")
-                tracker = 5
-        existing = session.query(User).filter_by(username=username).all()
-        if existing:
-            flash("Username already exists!")
-            tracker = 6 
+                tracker = 1
+        
+        # Ensure strong password
+        if tracker == 0:
+            if len(password) < 8:
+                flash("Password must contain a minimum of 10 characters!")
+                tracker = 1
+        
+        # Ensure username is not already in existance. 
+        if tracker == 0:
+            existing = session.query(User).filter_by(username=username).all()
+            if existing:
+                flash("Username already exists!")
+                tracker = 1
+        
+        # Create account if all above checks are passed.
         if tracker == 0:
             hashed = generate_password_hash(password)
             newuser = User(username=username, hash=hashed)

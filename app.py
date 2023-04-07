@@ -427,6 +427,7 @@ def delete_entry():
     if remaining_savings == None:
         flash('Entry deleted. You have no remaining savings.')
         nisab.nisab_reached = False
+        session.commit()
         return redirect('/dashboard')
     
     # If still above nisab, do nothing

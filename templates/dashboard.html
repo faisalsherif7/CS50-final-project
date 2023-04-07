@@ -59,10 +59,7 @@
                     <td>
                         <div class="row">
                             <div class="col-auto">
-                                <form action="/modify" method="post">
-                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-info" name="action" value="tracked">Modify</button>
-                                </form>
+                                <button type="submit" class="btn btn-info modify-btn" name="action" value="tracked">Modify</button>
                             </div>
                             <div class="col-auto">
                                 <form action="/delete_entry", method="post">
@@ -97,10 +94,7 @@
                     <td>
                         <div class="row">
                             <div class="col-auto">
-                                <form action="/modify" method="post">
-                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-info" name="action" value="untracked">Modify</button>
-                                </form>
+                                <button type="submit" class="btn btn-info modify-btn" name="action" value="untracked">Modify</button>
                             </div>
                             <div class="col-auto">
                                 <form action="/delete_entry", method="post">

@@ -14,6 +14,7 @@ class User(Base):
     income = relationship("Income", back_populates="user")
     expenses = relationship("Expenses", back_populates="user")
     nisab = relationship("Nisab", back_populates="user")
+    untracked_income = relationship("Untracked_Income", back_populates="user")
     
 class Income(Base):
     __tablename__ = 'income'
@@ -39,5 +40,13 @@ class Nisab(Base):
     id = Column(Integer, primary_key=True)
     amount = Column(Numeric(10,2))
     user_id = Column(Integer, ForeignKey('users.id'))
+    nisab_reached = Column(Boolean, default=False)
     user = relationship("User", back_populates="nisab")
 
+class Untracked_Income(Base):
+    __tablename__ = 'untracked_income'
+    id = Column(Integer, primary_key=True)
+    amount = Column(Numeric(10,2))
+    date = Column(DateTime, default=func.now())
+    user_id = Column(Integer, ForeignKey('users.id'))
+    user = relationship("User", back_populates="untracked_income")

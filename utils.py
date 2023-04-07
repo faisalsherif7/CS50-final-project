@@ -31,3 +31,10 @@ def login_required(f):
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False

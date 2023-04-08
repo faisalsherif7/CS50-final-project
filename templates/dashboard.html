@@ -4,9 +4,19 @@
 
 {% block content %}
 
-<h1 class="mb-4"> Add Income/Expense </h1>
-<form class="" action="/addmoney" method="post">
-    <div class="row justify-content-center">
+<h1 class="mb-2"> Add Savings </h1>
+<p class="fs-4 mt-1 mb-3">
+    Enter your savings amount below. Savings will be noted and tracked or untracked based on whether they reach the nisab or not.
+</p>
+<form class="mb-2" action="/addmoney" method="post">
+    <div class="row">
+        <div class="form-group col-auto">
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input autocomplete="off" class="form-control mx-auto" type="number" name="income" id="money" placeholder="Enter income amount"> 
+                <button class="btn btn-dark" type="submit">Add income</button>
+            </div>
+        </div>
         <div class="form-group col-auto">
             <div class="input-group datepicker">
                 {% set current_date = datetime.strftime(datetime.now(), '%Y-%m-%d') %}
@@ -14,26 +24,10 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-center">
-        <div class="form-group col-auto">
-            <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input autocomplete="off" class="form-control mx-auto" type="number" name="income" id="money" placeholder="Enter income amount"> 
-                <button class="btn btn-dark" type="submit" name="action" value="income">Add income</button>
-            </div>
-        </div>
-        <div class="form-group col-auto">
-            <div class="input-group">
-                <span class="input-group-text">$</span>
-                <input autocomplete="off" class="form-control mx-auto" type="number" name="expense" id="money" placeholder="Enter expense amount"> 
-                <button class="btn btn-dark" type="submit" name="action" value="expense">Add expense</button>
-            </div>
-        </div>
-    </div>
 </form>
-<p class="fs-5 mt-3 mb-3 text-center">
-    All your income entries will be reflected in the table below. Expense entries will be automatically subtracted. See <a href="/guide">About</a>
-    for more info.
+<p class="fs-4 mb-3">
+    Your savings will be reflected in the table below. To modify a savings amount, simply delete the 
+    savings and add another entry with the form provided (where date can be chosen).
 </p>
 
 {% if incomes %}
@@ -113,11 +107,11 @@
 {% else %}
 
 <div class="card justify-content-center mt-5">
-    <div class="card-header bg-dark text-center text-white">Income Table</div>
+    <div class="card-header bg-dark text-center text-white">Savings table</div>
     <div class="card-body bg-light text-center">
         <p class="fs-3">
             There are no current entries to display. 
-            To begin tracking your finances, please add an income entry using the form provided.
+            To begin tracking your finances, please add an entry using the form provided.
         </p>
     </div>
 </div>

@@ -12,7 +12,6 @@ class User(Base):
     username = Column(String, nullable=False, unique=True)
     hash = Column(String, nullable=False)
     income = relationship("Income", back_populates="user")
-    expenses = relationship("Expenses", back_populates="user")
     nisab = relationship("Nisab", back_populates="user")
     untracked_income = relationship("Untracked_Income", back_populates="user")
     
@@ -26,14 +25,6 @@ class Income(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship("User", back_populates="income")
     paid = Column(Boolean, default=False)
-
-class Expenses(Base):
-    __tablename__ = 'expenses'
-    id = Column(Integer, primary_key=True)
-    amount = Column(Numeric(10,2))
-    date = Column(DateTime, default=func.now())
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", back_populates="expenses")
 
 class Nisab(Base):
     __tablename__ = 'nisab'

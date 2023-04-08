@@ -4,26 +4,28 @@
 
 {% block content %}
 
-    <div class="fs-4 mt-3">
-        <p class="lead">
-            RATIB is based on Shaykh Ibn Baz's fatwa on how to calculate zakat on monthly salaries. See below for the fatwa.
-        </p>
-        <p>
-            RATIB is designed to help users easily and accurately track their zakat payments. Once a user inputs a zakat amount, 
-            our app tracks it for the following hijri year and displays it in a <a href="/due">zakat due</a> table when the payment becomes due. Users can then declare 
-            the payment as paid.
-        </p>
-        <p>
-            The <a href="/dashboard">dashboard</a> tab allows users to add incomes, which are automatically calculated and reflected in a table on the same page. Similarly, expenses 
-            added are automatically subtracted from the incomes entered, based on the order in which they were added. This means that the last expense entered 
-            will be the first one to be deducted from the income, and so on. This ensures that the user's financial data is updated accurately and reflects the 
-            most recent changes.
-        </p>
-        <p>
-            The <a href="/history">history</a> tab contains two tables - one for past paid zakat entries and one for all expenses ever entered. Users can delete an expense in the 
-            expenses table and permanently delete a paid zakat entry in the past paid zakat table.
-        </p>
-    </div>
+<div class="fs-4 mt-3">
+    <p class="lead">
+        RATIB is designed to help users easily and accurately calculate and keep track of zakat payments on their salary,
+        based on Shaykh Ibn Baz's fatwa on how to calculate zakat on monthly salaries. Please refer to the fatwa below for details.
+    </p>
+    <p>
+        To get started, users must first <a href="/nisab">set</a> a nisab amount.
+    </p>
+    <p>
+        The <a href="/dashboard">dashboard</a> tab allows users to add savings, which are automatically calculated and reflected in a table on the same page. If 
+        users need to modify a savings amount, they can simply delete the entry and add another one with the desired amount and date using the form provided. The 
+        savings table will accurately reflect all savings entries made.
+    </p>
+    <p>
+        Once a user inputs a zakat amount, RATIB will note and track the amount accordingly based on whether it reaches the nisab or not. If the amount reaches the nisab, 
+        it is tracked for the following hijri year and displayed in a <a href="/due">zakat due</a> table when the payment becomes due. Users can then declare 
+        the amount as paid, and it will be recorded.
+    </p>
+    <p>
+        The <a href="/history">history</a> tab contains information about past paid zakat entries.
+    </p>
+</div>
 
     <h1 class="my-5">Fatwa</h1>
         <h2>Zakaah on an Employee’s Salary – Shaykh ‘Abd al-‘Azeez ibn Baaz</h2>

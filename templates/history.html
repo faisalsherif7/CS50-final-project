@@ -10,6 +10,7 @@
     <table class="table table-bordered mt-3">
         <h1 class="mt-3 text-center"> Paid Zakat </h1>
         <thead class="table-dark text-center">
+            <th>Number</th>
             <th>Date of income</th>
             <th>Amount</th>
             <th>Date Due</th>
@@ -18,47 +19,12 @@
         <tbody class="table-info">
             {% for entry in paid %}
             <tr>
+                <td>{{ loop.index }}</td>
                 <td>{{ entry.date.date() }}</td>
                 <td>{{ entry.amount | usd}}</td>
                 <td>{{ entry.due_date.date() }}</td>
                 <td>{{ entry.due_amount | usd}}</td>
             </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div class="table-responsive">
-    <table class="table table-bordered mt-3">
-        <h1 class="mt-3 text-center"> All Savings Entries</h1>
-        <thead class="table-dark text-center">
-            <th>Number</th>
-            <th>Date added</th>
-            <th>Amount</th>
-            <th>Date Due</th>
-            <th>Due Amount</th>
-            <th>Modify</th>
-        </thead>
-        <tbody class="table-info">
-            {% for income in incomes %}
-            {% if income.paid == False %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ income.date.date() }}</td>
-                <td>{{ income.amount | usd}}</td>
-                <td>{{ income.due_date.date() }}</td>
-                <td>{{ income.due_amount | usd}}</td>    
-                <td>
-                    <div class="row">
-                        <div class="col-auto">
-                            <form action="/delete_entry", method="post">
-                                <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </td>
-            </tr> 
-            {% endif %}
             {% endfor %}
         </tbody>
     </table>

@@ -147,13 +147,13 @@ def guide():
 @login_required
 def dashboard():
     userid = flasksession.get("user_id")
-    incomes = session.query(Income).filter_by(user_id=userid)
+    incomes = session.query(Income).filter_by(user_id=userid, paid=False)
     if incomes.count() != 0:
         return render_template('dashboard.html', incomes=incomes, datetime=datetime)
     untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid)
     if untracked_incomes.count() != 0:
         return render_template('dashboard.html', untracked_incomes=untracked_incomes, datetime=datetime)
-    return render_template('dashboard.html', incomes=None, datetime=datetime)
+    return render_template('dashboard.html', datetime=datetime)
 
 
 @app.route('/settings')
@@ -363,7 +363,7 @@ def paid():
         nisab.nisab_reached = False
         session.commit()
         flash('Zakat paid; your remaining savings are below the nisab, and are therefore not being tracked.')
-        return redirect('/dashboard')
+        return redirect('/due')
     
 
 @app.route('/delete_entry', methods = ["POST"])
@@ -415,11 +415,6 @@ def delete_entry():
         flash('Entry deleted. Your remaining savings are below the nisab, and are therefore not being tracked.')
         return redirect('/dashboard')
     
-
-@app.route('/modify')
-def modify():
-    return None
-
 
 @app.route('/history')
 def history():

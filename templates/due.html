@@ -16,12 +16,12 @@
                 <th>Due Amount</th>
                 <th>Modify</th>
             </thead>
-            <tbody class="table-info">
+            <tbody class="table-info text-center">
                 {% for income in incomes %}
                 <tr>
-                    <td>{{ income.date }}</td>
+                    <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
-                    <td>{{ income.due_date }}</td>
+                    <td>{{ income.due_date.date() }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
                     <td>
                         <form action="/paid", method="post">

@@ -40,31 +40,22 @@
                 <th>Amount</th>
                 <th>Date Due</th>
                 <th>Due Amount</th>
-                <th></th>
+                <th>Delete Entry</th>
             </thead>
-            <tbody class="table-info text-center justify-content-center">
+            <tbody class="table-info text-center">
                 {% for income in incomes | sort(attribute='date') %}
-                {% if income.paid == False %}
                 <tr>
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
                     <td>{{ income.due_date.date() }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
-                    <td>
-                        <div class="row">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-info modify-btn" name="action" value="tracked">Modify</button>
-                            </div>
-                            <div class="col-auto">
-                                <form action="/delete_entry", method="post">
-                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-danger" name="action" value="tracked">Delete</button>
-                                </form>
-                            </div>
-                        </div>
+                    <td class="text-center">
+                        <form action="/delete_entry", method="post">
+                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                            <button type="submit" class="btn btn-danger" name="action" value="tracked">Delete</button>
+                        </form>
                     </td>
                 </tr> 
-                {% endif %}
                 {% endfor %}
             </tbody>
     </table>
@@ -78,25 +69,18 @@
         <thead class="table-dark text-center">
                 <th>Date added</th>
                 <th>Amount</th>
-                <th></th>
+                <th>Delete Entry</th>
             </thead>
-            <tbody class="table-info text-center justify-content-center">
+            <tbody class="table-info text-center">
                 {% for income in untracked_incomes | sort(attribute='date') %}
                 <tr>
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
-                    <td>
-                        <div class="row">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-info modify-btn" name="action" value="untracked">Modify</button>
-                            </div>
-                            <div class="col-auto">
-                                <form action="/delete_entry", method="post">
-                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                                    <button type="submit" class="btn btn-danger" name="action" value="untracked">Delete</button>
-                                </form>
-                            </div>
-                        </div>
+                    <td class="text-center">
+                        <form action="/delete_entry", method="post">
+                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                            <button type="submit" class="btn btn-danger" name="action" value="untracked">Delete</button>
+                        </form>
                     </td>
                 </tr> 
                 {% endfor %}

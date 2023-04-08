@@ -9,7 +9,7 @@ from database import db_session as session
 from models import User, Income, Nisab, Untracked_Income
 from sqlalchemy import func
 
-# imports from util
+# imports from utils
 from utils import login_required, usd, plus_one_hijri, isfloat
 
 
@@ -129,13 +129,7 @@ def register():
 @app.route('/')
 @app.route('/home')
 def index():
-    if flasksession.get("user_id"):
-        userid = flasksession.get("user_id")
-        user = session.query(User).filter_by(id=userid).first()
-        username = user.username if user else None
-        return render_template("home.html", u = username)
-    else:
-        return render_template("home.html", u = 'random user')
+    return render_template("home.html")
 
 
 @app.route('/guide')
@@ -417,6 +411,7 @@ def delete_entry():
     
 
 @app.route('/history')
+@login_required
 def history():
     userid = flasksession.get('user_id')
     incomes = session.query(Income).filter_by(user_id=userid).all()

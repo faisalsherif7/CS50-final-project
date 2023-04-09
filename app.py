@@ -500,26 +500,25 @@ def change_password():
     flash('Password changed successfully!')
     return redirect('/settings')
 
-@app.route('/update_entry', methods=["POST"])
+@app.route('/update_untracked', methods=["POST"])
 @login_required
-def update_entry():
+def update_untracked():
+
     # Get the form data into variables
     income_id = request.form.get('income_id')
-    date = request.form.get('date')
+    date_input = request.form.get('date')
     income = request.form.get('income')
-
-    # Ensure that the income entered is a positive number
-    try:
-        income = float(income)
-        if income < 0:
-            raise ValueError('Income must be positive')
-    except ValueError:
-        response_data = {'error': 'Invalid income value'}
-        return jsonify(response_data), 400
-
-    # Your code to update the database here
-    # ...
-
+    date = datetime.strptime(date_input, '%Y-%m-%d')
+    
+    # Get nisab
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
+    
+    # Update database
+    entry = session.query(Untracked_Income).get(income_id)
+    entry.date = date
+    entry.amount = income
+    session.commit()
+    
     # Return a JSON response with a success message
     response_data = {'message': 'Entry updated successfully'}
     return jsonify(response_data)

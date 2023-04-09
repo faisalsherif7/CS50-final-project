@@ -1,5 +1,5 @@
 // Get the table element
-const table = document.querySelector('#income-table');
+const table = document.querySelector('#untracked-table');
 
 // Add an event listener to the table itself
 $(table).on('click', 'button[type="submit"]', (event) => {
@@ -43,7 +43,7 @@ $(table).on('click', 'button[type="submit"]', (event) => {
 
     // Send a POST request to the Flask app with the updated values
     $.ajax({
-      url: '/update_entry',
+      url: '/update_untracked',
       type: 'POST',
       dataType: 'json',
       data: {

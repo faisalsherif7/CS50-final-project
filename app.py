@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, flash
-from flask import session as flasksession
+from flask import Flask, render_template, request, redirect, flash, jsonify, session as flasksession
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
@@ -501,10 +500,29 @@ def change_password():
     flash('Password changed successfully!')
     return redirect('/settings')
 
-@app.route('/update_entry', methods = ["POST"])
+@app.route('/update_entry', methods=["POST"])
 @login_required
 def update_entry():
-    return None
+    # Get the form data into variables
+    income_id = request.form.get('income_id')
+    date = request.form.get('date')
+    income = request.form.get('income')
+
+    # Ensure that the income entered is a positive number
+    try:
+        income = float(income)
+        if income < 0:
+            raise ValueError('Income must be positive')
+    except ValueError:
+        response_data = {'error': 'Invalid income value'}
+        return jsonify(response_data), 400
+
+    # Your code to update the database here
+    # ...
+
+    # Return a JSON response with a success message
+    response_data = {'message': 'Entry updated successfully'}
+    return jsonify(response_data)
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

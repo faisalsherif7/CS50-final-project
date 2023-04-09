@@ -501,6 +501,11 @@ def change_password():
     flash('Password changed successfully!')
     return redirect('/settings')
 
+@app.route('/update_entry', methods = ["POST"])
+@login_required
+def update_entry():
+    return None
+
 
 # SQLAlchemy - Flask removes database sessions at end of request
 @app.teardown_appcontext

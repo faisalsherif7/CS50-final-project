@@ -509,7 +509,7 @@ def update_untracked():
     date_input = request.form.get('date')
     income = request.form.get('income')
     date = datetime.strptime(date_input, '%Y-%m-%d')
-    userid = flasksession.get["user_id"]
+    userid = flasksession.get("user_id")
     
     # Get nisab
     nisab = session.query(Nisab).filter_by(user_id=userid).first()

@@ -510,7 +510,12 @@ def update_untracked():
     income = request.form.get('income')
     date = datetime.strptime(date_input, '%Y-%m-%d')
     userid = flasksession.get("user_id")
-    
+
+    if not isfloat(income):
+        response_data = {'message': 'Please enter valid amount!'}
+        flash('Please enter valid amount!')
+        return jsonify(response_data)
+
     # Get nisab
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
     
@@ -522,6 +527,7 @@ def update_untracked():
 
     # Return a JSON response with a success message
     response_data = {'message': 'Entry updated successfully'}
+    flash('Entry updated successfully!')
     return jsonify(response_data)
 
 

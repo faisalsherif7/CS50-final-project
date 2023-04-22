@@ -43,7 +43,7 @@ def login():
 
         # Ensure all field were submitted
         if not username or not password:
-            flash("All fields are required!")
+            flash("All fields are required!", "danger")
             tracker = 1
 
         # Query database for username
@@ -52,7 +52,7 @@ def login():
         # Ensure username exists and password is correct
         if not rows or not check_password_hash(rows.hash, request.form.get("password")):
             if tracker != 1:
-                flash("Invalid username and/or password")
+                flash("Invalid username and/or password", "danger")
             tracker = 2
 
         if tracker == 0:
@@ -87,30 +87,30 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         if not username:
-            flash("Please enter username!")
+            flash("Please enter username!", "danger")
             tracker = 1 
         elif not password:
-            flash("Please enter password!")
+            flash("Please enter password!", "danger")
             tracker = 1
         elif not confirmation:
-            flash("Please confirm password!")
+            flash("Please confirm password!", "danger")
             tracker = 1
         if tracker == 0:
             if password != confirmation:
-                flash("Passwords do not match!")
+                flash("Passwords do not match!", "danger")
                 tracker = 1
         
         # Ensure strong password
         if tracker == 0:
             if len(password) < 8:
-                flash("Password must contain a minimum of 10 characters!")
+                flash("Password must contain a minimum of 10 characters!", "danger")
                 tracker = 1
         
         # Ensure username is not already in existance. 
         if tracker == 0:
             existing = session.query(User).filter_by(username=username).all()
             if existing:
-                flash("Username already exists!")
+                flash("Username already exists!", "danger")
                 tracker = 1
         
         # Create account if all above checks are passed.
@@ -119,7 +119,7 @@ def register():
             newuser = User(username=username, hash=hashed)
             session.add(newuser)
             session.commit()
-            flash('Account created successfully. You can log in now.')
+            flash('Account created successfully. You can log in now.', "success")
             return redirect("/login")
         else:
             return redirect("/register")
@@ -164,26 +164,26 @@ def addmoney():
     try:
         date = datetime.strptime(date_input, '%Y-%m-%d')
     except ValueError:
-        flash("A valid date must be entered. Do not attempt to modify HTML file.")
+        flash("A valid date must be entered. Do not attempt to modify HTML file.", "danger")
         return redirect('/dashboard')
     
 
     # Check for valid amount entry
     amount = request.form.get('income')
     if not amount:
-        flash("Please enter amount!")
+        flash("Please enter amount!", "danger")
         return redirect('/dashboard')
     if not isfloat(amount):
-        flash('Please enter valid amount!')
+        flash('Please enter valid amount!', "danger")
         return redirect('/dashboard')
     if float(amount) <= 0:
-        flash('Please enter valid amount!')
+        flash('Please enter valid amount!', "danger")
         return redirect('/dashboard')
     
     # First, obtain nisab value. If no nisab value is found, then prompt user to add a nisab value first.
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
     if nisab == None:
-        flash("Please set a nisab value before adding an income")
+        flash("Please set a nisab value before adding an income", "danger")
         return redirect('/dashboard')
     
     # Check if nisab has been reached by current savings.
@@ -194,7 +194,7 @@ def addmoney():
         income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * int(amount)), date=date, due_date=plus_one_hijri(date))
         session.add(income)
         session.commit()
-        flash("Income added. Your savings cross the nisab threshold and are being tracked for zakat.")
+        flash("Income added. Your savings cross the nisab threshold and are being tracked for zakat.", "success")
         return redirect('/dashboard')
 
     # If nisab not reached, get amount from untracked income table, check for nisab threshold, and add to corresponding table.
@@ -210,7 +210,7 @@ def addmoney():
             income = Untracked_Income(amount=amount, user_id=userid, date=date)
             session.add(income)
             session.commit()
-            flash("Income added. You have not crossed the nisab threshold yet, so the amount is not being tracked for zakat.")
+            flash("Income added. You have not crossed the nisab threshold yet, so the amount is not being tracked for zakat.", "success")
             return redirect('/dashboard')
         
         # If nisab threshold reached on new income entry.
@@ -222,7 +222,7 @@ def addmoney():
                 session.delete(entry)
             nisab.nisab_reached = True
             session.commit()
-            flash("Income added. You have crossed the nisab threshold. Your zakat year begins now.")
+            flash("Income added. You have crossed the nisab threshold. Your zakat year begins now.", "success")
             return redirect('/dashboard')
 
 
@@ -242,11 +242,11 @@ def nisab():
         # Ensure valid nisab entry
         nisab_new_string = request.form.get("nisab")
         if not isfloat(nisab_new_string):
-            flash('Please enter valid nisab amount!')
+            flash('Please enter valid nisab amount!', "danger")
             return redirect('/nisab')
         nisab_new = float(nisab_new_string)
         if nisab_new <= 0:
-            flash('Please enter valid nisab amount')
+            flash('Please enter valid nisab amount', "danger")
             return redirect('/nisab')
 
         # If nisab wasn't set before.
@@ -254,7 +254,7 @@ def nisab():
             enter_nisab = Nisab(amount=nisab_new, user_id=userid)
             session.add(enter_nisab)
             session.commit()
-            flash('Nisab set successfully.')
+            flash('Nisab set successfully.', "info")
 
         # If nisab is being changed.
         else:
@@ -268,12 +268,12 @@ def nisab():
                     nisab.amount = nisab_new
                     nisab.nisab_reached = False
                     session.commit()
-                    flash('Nisab updated.')
+                    flash('Nisab updated.', 'info')
                     return redirect('/nisab')
 
                 # If savings are still above updated nisab, do nothing.
                 if total_before >= nisab_new:
-                    flash('Nisab updated. Your savings still cross the nisab threshold and are tracked for zakat.')
+                    flash('Nisab updated. Your savings still cross the nisab threshold and are tracked for zakat.', 'info')
                 
                 # If savings dip below updated nisab, change previous savings sum to untracked_income table and stop tracking.
                 elif total_before < nisab_new:
@@ -283,8 +283,8 @@ def nisab():
                     for income in incomes:
                         session.delete(income)
                     nisab.nisab_reached = False
-                    flash('Nisab updated. Your savings have dipped below the updated nisab amount and are now not tracked for zakat.')
-                    flash('Your savings will begin being tracked if they cross the nisab threshold in the future.')
+                    flash('Nisab updated. Your savings have dipped below the updated nisab amount and are now not tracked for zakat.', 'info')
+                    flash('Your savings will begin being tracked if they cross the nisab threshold in the future.', 'info')
             
             # If savings were below the previous nisab threshold, then we work on the Untracked Income table.
             elif nisab.nisab_reached == False:
@@ -295,12 +295,12 @@ def nisab():
                     nisab.amount = nisab_new
                     nisab.nisab_reached = False
                     session.commit()
-                    flash('Nisab updated.')
+                    flash('Nisab updated.', 'info')
                     return redirect('/nisab')
 
                 # If savings are still below updated nisab, do nothing.
                 if total_before < nisab_new:
-                    flash('Nisab updated. Your savings are still below the nisab threshold and are not tracked for zakat.')
+                    flash('Nisab updated. Your savings are still below the nisab threshold and are not tracked for zakat.', 'info')
 
                 # If savings cross updated nisab threshold, change savings to income table and start tracking.
                 elif total_before >= nisab_new:
@@ -312,7 +312,7 @@ def nisab():
                     for income in incomes:
                         session.delete(income)
                     nisab.nisab_reached = True
-                    flash('Nisab updated. Your savings now cross the updated nisab threshold and are now tracked for zakat.')
+                    flash('Nisab updated. Your savings now cross the updated nisab threshold and are now tracked for zakat.', 'info')
                 
             # Update nisab. 
             nisab.amount = nisab_new
@@ -343,7 +343,7 @@ def paid():
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
     remaining_savings = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
     if remaining_savings >= nisab.amount:
-        flash('Zakat paid; your remaining savings cross the nisab threshold, and so are being tracked for next hijri year.')
+        flash('Zakat paid; your remaining savings cross the nisab threshold, and so are being tracked for next hijri year.', 'success')
         return redirect('/dashboard')
     
     # If remaining savings dip below nisab, change tables and stop tracking.
@@ -355,7 +355,7 @@ def paid():
             session.delete(income)
         nisab.nisab_reached = False
         session.commit()
-        flash('Zakat paid; your remaining savings are below the nisab, and are therefore not being tracked.')
+        flash('Zakat paid; your remaining savings are below the nisab, and are therefore not being tracked.', 'success')
         return redirect('/due')
     
 
@@ -386,14 +386,14 @@ def delete_entry():
 
     # If no remaining savings, say so.
     if remaining_savings == None:
-        flash('Entry deleted. You have no remaining savings.')
+        flash('Entry deleted. You have no remaining savings.', 'success')
         nisab.nisab_reached = False
         session.commit()
         return redirect('/dashboard')
     
     # If still above nisab, do nothing
     if remaining_savings >= nisab.amount:
-        flash('Entry deleted. Your remaining savings still cross the nisab threshold and zakat is still due.')
+        flash('Entry deleted. Your remaining savings still cross the nisab threshold and zakat is still due.', 'success')
         return redirect('/dashboard')
     
     # If remaining savings dip below nisab, change tables and stop tracking.
@@ -405,7 +405,7 @@ def delete_entry():
             session.delete(income)
         nisab.nisab_reached = False
         session.commit()
-        flash('Entry deleted. Your remaining savings are below the nisab, and are therefore not being tracked.')
+        flash('Entry deleted. Your remaining savings are below the nisab, and are therefore not being tracked.', 'success')
         return redirect('/dashboard')
     
 
@@ -439,18 +439,18 @@ def delete_account():
 
     # Ensure username and password are submitted
     if not username or not password:
-        flash("must provide username/password")
+        flash("must provide username/password", "danger")
         return redirect('/settings')
 
     # Ensure correct username was submitted 
     user = session.query(User).get(userid)
     if username != user.username:
-        flash("Invalid username!")
+        flash("Invalid username!", "danger")
         return redirect('/settings')
 
     # Ensure username exists and password is correct
     if not user or not check_password_hash(user.hash, password):
-        flash("invalid username and/or password")
+        flash("invalid username and/or password", "danger")
         return redirect('/settings')
 
     # Delete account and all data
@@ -466,7 +466,7 @@ def delete_account():
     if nisab != None:
         session.delete(nisab)
     session.commit()
-    flash("Your account has been deleted.")
+    flash("Your account has been deleted.", "success")
     return redirect("/")
 
 
@@ -481,23 +481,23 @@ def change_password():
 
     # Ensure all fields are filled
     if not old_password or not new_password or not confirmation:
-        flash('All fields are required!')
+        flash('All fields are required!', 'danger')
         return redirect('/settings')
     
     # Ensure correct password is entered
     if not check_password_hash(user.hash, old_password):
-        flash('Invalid password entered!')
+        flash('Invalid password entered!', 'danger')
         return redirect('/settings')
     
     # Ensure passwords match
     if new_password != confirmation:
-        flash('Passwords do not match!')
+        flash('Passwords do not match!', 'danger')
         return redirect('/settings')
     
     # Change password
     user.hash = generate_password_hash(new_password)
     session.commit()
-    flash('Password changed successfully!')
+    flash('Password changed successfully!', 'success')
     return redirect('/settings')
 
 @app.route('/update_untracked', methods=["POST"])
@@ -513,7 +513,7 @@ def update_untracked():
 
     if not isfloat(income):
         response_data = {'message': 'Please enter valid amount!'}
-        flash('Please enter valid amount!')
+        flash('Please enter valid amount!', 'danger')
         return jsonify(response_data)
 
     # Get nisab
@@ -527,7 +527,7 @@ def update_untracked():
 
     # Return a JSON response with a success message
     response_data = {'message': 'Entry updated successfully'}
-    flash('Entry updated successfully!')
+    flash('Entry updated successfully!', 'success')
     return jsonify(response_data)
 
 

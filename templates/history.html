@@ -4,6 +4,7 @@
 
 {% block content %}
 
+{% if paid %}
 
 <div class="table-responsive">
     <table class="table table-bordered mt-3">
@@ -28,5 +29,11 @@
         </tbody>
     </table>
 </div>
+
+{% else %} 
+
+No history
+
+{% endif %}
 
 {% endblock %}

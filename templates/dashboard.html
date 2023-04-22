@@ -38,9 +38,9 @@
         <thead class="table-dark text-center">
                 <th>Date added</th>
                 <th>Amount</th>
-                <th>Date Due</th>
-                <th>Due Amount</th>
-                <th>Delete Entry</th>
+                <th id="due-date-header">Date Due</th>
+                <th id="due-amount-header">Due Amount</th>
+                <th>Modify/Delete</th>
             </thead>
             <tbody class="table-info text-center">
                 {% for income in incomes | sort(attribute='date') %}
@@ -79,7 +79,7 @@
         <thead class="table-dark text-center">
                 <th>Date added</th>
                 <th>Amount</th>
-                <th>Delete Entry</th>
+                <th>Modify/Delete</th>
             </thead>
             <tbody class="table-info text-center">
                 {% for income in untracked_incomes | sort(attribute='date') %}

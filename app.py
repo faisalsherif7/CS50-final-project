@@ -413,9 +413,8 @@ def delete_entry():
 @login_required
 def history():
     userid = flasksession.get('user_id')
-    incomes = session.query(Income).filter_by(user_id=userid).all()
     paid = session.query(Income).filter_by(user_id=userid, paid=True).all()
-    return render_template('history.html', incomes=incomes, paid=paid)
+    return render_template('history.html', paid=paid)
 
 
 @app.route('/due')
@@ -570,6 +569,10 @@ def update_untracked():
     flash('Entry updated successfully. You have now crossed the nisab threshold and your income is being tracked for zakat.', 'success')
     return jsonify(response_data)
 
+@app.route('/update_income', methods=["POST"])
+@login_required
+def update_untracked():
+    return 
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

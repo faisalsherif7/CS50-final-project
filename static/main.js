@@ -2,7 +2,7 @@
 const table = document.querySelector('#untracked-table');
 
 // Add an event listener to the table itself
-$(table).on('click', 'button[type="submit"]', (event) => {
+$(table).on('click', 'button#modify-button', (event) => {
   event.preventDefault();
   const button = event.target;
 
@@ -52,9 +52,6 @@ $(table).on('click', 'button[type="submit"]', (event) => {
         income: updatedIncome
       },
       success: (response) => {
-
-        // Flash a success message
-        $('.alert-success').fadeIn();
         
         // Refresh the page after
         window.location.reload();

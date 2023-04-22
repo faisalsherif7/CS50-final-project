@@ -538,6 +538,7 @@ def update_untracked():
     
     # If nisab reached, transfer entries from Untracked_Income table to Income table   
     query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
+    nisab.nisab_reached = True
 
     # Iterate over the results and take action when the sum reaches the target amount
     total = 0
@@ -549,6 +550,7 @@ def update_untracked():
             change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * int(total)), date=income.date, due_date=plus_one_hijri(income.date))
             session.add(change_table)
             session.delete(income)
+            session.commit()
         
         # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
         else:
@@ -561,17 +563,12 @@ def update_untracked():
     for untracked_income in untracked_incomes:
         income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(total)), due_date=plus_one_hijri(income.date))
         session.add(income)
-
-    # Commit the changes to the database
-    session.commit()
+        session.commit()
 
     # Return a JSON response with a success message
     response_data = {'message': 'Entry updated successfully'}
     flash('Entry updated successfully. You have now crossed the nisab threshold and your income is being tracked for zakat.', 'success')
     return jsonify(response_data)
-
-
-    
 
 
 

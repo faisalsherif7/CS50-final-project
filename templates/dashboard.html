@@ -50,10 +50,20 @@
                     <td>{{ income.due_date.date() }}</td>
                     <td>{{ income.due_amount | usd}}</td>    
                     <td class="text-center">
-                        <form action="/delete_entry", method="post">
-                            <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
-                            <button type="submit" class="btn btn-danger" name="action" value="tracked">Delete</button>
-                        </form>
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <form id="modify-form">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-success" id="modify-button" name="action" value="tracked">Modify</button>
+                                </form>
+                            </div>
+                            <div class="col-auto">
+                                <form action="/delete_entry", method="post">
+                                    <input type="hidden" name="income_id" class="hidden-field" value='{{ income.id }}'>
+                                    <button type="submit" class="btn btn-danger" name="action" value="tracked">Delete</button>
+                                </form>
+                            </div>
+                        </div>
                     </td>
                 </tr> 
                 {% endfor %}

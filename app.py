@@ -371,7 +371,7 @@ def delete_entry():
         entry = session.query(Untracked_Income).get(income_id)
         session.delete(entry)
         session.commit()
-        flash('Entry deleted.')
+        flash('Entry deleted.', 'success')
         return redirect('/dashboard')
 
     # Functionality to completely delete an income entry from history
@@ -525,10 +525,54 @@ def update_untracked():
     entry.amount = income
     session.commit()
 
+    # Take action based on nisab
+    total_now = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
+
+    # If nisab not reached
+    if total_now < nisab.amount:
+
+        # Return a JSON response with a success message
+        response_data = {'message': 'Entry updated successfully'}
+        flash('Entry updated successfully!', 'success')
+        return jsonify(response_data)
+    
+    # If nisab reached, transfer entries from Untracked_Income table to Income table   
+    query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
+
+    # Iterate over the results and take action when the sum reaches the target amount
+    total = 0
+    for income in query:
+        total += income.amount
+        if total >= nisab.amount:
+            
+            # Add entry number 1 to income table and delete entry from Untracked_Income table
+            change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * int(total)), date=income.date, due_date=plus_one_hijri(income.date))
+            session.add(change_table)
+            session.delete(income)
+        
+        # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
+        else:
+            session.delete(income)
+    
+    # Get remaining entries from the Untracked_Income table
+    untracked_incomes = session.query(Untracked_Income).order_by(Untracked_Income.date).all()
+
+    # Loop through each entry and add it to the Income table
+    for untracked_income in untracked_incomes:
+        income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(total)), due_date=plus_one_hijri(income.date))
+        session.add(income)
+
+    # Commit the changes to the database
+    session.commit()
+
     # Return a JSON response with a success message
     response_data = {'message': 'Entry updated successfully'}
-    flash('Entry updated successfully!', 'success')
+    flash('Entry updated successfully. You have now crossed the nisab threshold and your income is being tracked for zakat.', 'success')
     return jsonify(response_data)
+
+
+    
+
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

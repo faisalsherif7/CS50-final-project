@@ -499,6 +499,7 @@ def change_password():
     flash('Password changed successfully!', 'success')
     return redirect('/settings')
 
+
 @app.route('/update_untracked', methods=["POST"])
 @login_required
 def update_untracked():
@@ -550,6 +551,7 @@ def update_untracked():
             session.add(change_table)
             session.delete(income)
             session.commit()
+            break
         
         # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
         else:
@@ -560,7 +562,7 @@ def update_untracked():
 
     # Loop through each entry and add it to the Income table
     for untracked_income in untracked_incomes:
-        income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(total)), due_date=plus_one_hijri(income.date))
+        income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(untracked_income.amount)), due_date=plus_one_hijri(untracked_income.date))
         session.add(income)
         session.commit()
 
@@ -569,10 +571,55 @@ def update_untracked():
     flash('Entry updated successfully. You have now crossed the nisab threshold and your income is being tracked for zakat.', 'success')
     return jsonify(response_data)
 
+
 @app.route('/update_income', methods=["POST"])
 @login_required
-def update_untracked():
-    return 
+def update_income():
+
+    # Get the form data into variables
+    income_id = request.form.get('income_id')
+    date_input = request.form.get('date')
+    income = request.form.get('income')
+    date = datetime.strptime(date_input, '%Y-%m-%d')
+    userid = flasksession.get("user_id")
+
+    if not isfloat(income):
+        response_data = {'message': 'Please enter valid amount!'}
+        flash('Please enter valid amount!', 'danger')
+        return jsonify(response_data)
+
+    # Get nisab
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
+    
+    # Update database
+    entry = session.query(Income).get(income_id)
+    entry.date = date
+    entry.amount = income
+    session.commit()
+
+    # Take action based on nisab
+    total_now = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
+
+    # If still above nisab, update and do nothing
+    if total_now >= nisab.amount:
+        response_data = {'message': 'Entry updated successfully'}
+        flash('Entry updated successfully. You savings still cross the nisab threshold and your income is being tracked for zakat.', 'success')
+        return jsonify(response_data)
+    
+    # If it goes below nisab, change tables
+    query = session.query(Income).filter_by(user_id=userid).order_by(Income.date).all()
+    nisab.nisab_reached = False
+    for income in query:
+        change_table = Untracked_Income(date=income.date, amount=income.amount, user_id=userid)
+        session.add(change_table)
+        session.delete(income)
+        session.commit() 
+
+    # Send JSON response
+    response_data = {'message': 'Entry updated successfully'}
+    flash('Entry updated successfully. You savings have dipped below nisab and are now not being tracked.', 'success')
+    return jsonify(response_data)
+
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

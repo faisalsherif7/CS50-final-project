@@ -158,7 +158,6 @@ def settings():
 @app.route('/addmoney', methods=["POST"])
 @login_required
 def addmoney():
-    action = request.form.get('action')
     userid = flasksession.get("user_id")
     date_input = request.form.get('date')
     try:
@@ -166,7 +165,6 @@ def addmoney():
     except ValueError:
         flash("A valid date must be entered. Do not attempt to modify HTML file.", "danger")
         return redirect('/dashboard')
-    
 
     # Check for valid amount entry
     amount = request.form.get('income')
@@ -215,14 +213,45 @@ def addmoney():
         
         # If nisab threshold reached on new income entry.
         elif total_now >= nisab.amount:
-            income = Income(amount=total_now, user_id=userid, due_amount= (2.5/100 * int(total_now)), date=date, due_date=plus_one_hijri(date))
-            session.add(income)
-            delete_untracked = session.query(Untracked_Income).filter_by(user_id=userid).all()
-            for entry in delete_untracked:
-                session.delete(entry)
-            nisab.nisab_reached = True
+
+            # First, add income to untracked entry table
+            latest_entry = Untracked_Income(amount=amount, user_id=userid, date=date)
+            session.add(latest_entry)
             session.commit()
-            flash("Income added. You have crossed the nisab threshold. Your zakat year begins now.", "success")
+
+            # Transfer entries from untracked_income table to income table
+            query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
+            nisab.nisab_reached = True
+
+            # Iterate over the results and take action when the sum reaches the target amount
+            total = 0
+            for income in query:
+                total += income.amount
+                if total >= nisab.amount:
+                    
+                    # Add entry number 1 to income table and delete entry from Untracked_Income table
+                    change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * int(total)), date=income.date, due_date=plus_one_hijri(income.date))
+                    session.add(change_table)
+                    session.delete(income)
+                    session.commit()
+                    break
+                
+                # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
+                else:
+                    session.delete(income)
+            
+            # Get remaining entries from the Untracked_Income table
+            untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
+
+            # Loop through each entry and add it to the Income table
+            for untracked_income in untracked_incomes:
+                income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(untracked_income.amount)), due_date=plus_one_hijri(untracked_income.date))
+                session.add(income)
+                session.delete(untracked_income)
+                session.commit()
+
+            # Return function
+            flash("Income added. You have crossed the nisab threshold. Your savings are being tracked.", "success")
             return redirect('/dashboard')
 
 
@@ -398,10 +427,10 @@ def delete_entry():
     
     # If remaining savings dip below nisab, change tables and stop tracking.
     elif remaining_savings < nisab.amount:
-        stop_tracking = Untracked_Income(amount=remaining_savings, user_id=userid)
-        session.add(stop_tracking)
-        incomes = session.query(Income).filter_by(user_id=userid, paid=False).all()
+        incomes = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
         for income in incomes:
+            stop_tracking = Untracked_Income(user_id=userid, amount=income.amount, date=income.date)
+            session.add(stop_tracking)
             session.delete(income)
         nisab.nisab_reached = False
         session.commit()
@@ -558,12 +587,13 @@ def update_untracked():
             session.delete(income)
     
     # Get remaining entries from the Untracked_Income table
-    untracked_incomes = session.query(Untracked_Income).order_by(Untracked_Income.date).all()
+    untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
 
     # Loop through each entry and add it to the Income table
     for untracked_income in untracked_incomes:
         income = Income(date=untracked_income.date, amount=untracked_income.amount, user_id=userid, due_amount= (2.5/100 * int(untracked_income.amount)), due_date=plus_one_hijri(untracked_income.date))
         session.add(income)
+        session.delete(untracked_income)
         session.commit()
 
     # Return a JSON response with a success message

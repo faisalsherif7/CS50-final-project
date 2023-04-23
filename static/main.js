@@ -18,8 +18,8 @@ $(table).on('click', 'button#modify-button', (event) => {
 
   // Replace the row's HTML with two input fields and a submit button
   const formHTML = `
-    <td><input type="date" class="form-control" name="date" id="date-input" value="${currentDate}"></td>
-    <td><input type="text" class="form-control" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
+    <td><input type="date" class="form-control mx-auto" name="date" id="date-input" value="${currentDate}"></td>
+    <td><input type="text" class="form-control mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
     <td>
       <button class="btn btn-success" type="button" id="save-button">Save</button>
       <button class="btn btn-danger" type="button" id="cancel-button">Cancel</button>
@@ -55,7 +55,6 @@ $(table).on('click', 'button#modify-button', (event) => {
         
         // Refresh the page after
         window.location.reload();
-
       },
       error: (xhr) => {
         console.log('Error:', xhr.status);
@@ -126,7 +125,6 @@ $(income_table).on('click', 'button#modify-button', (event) => {
         
         // Refresh the page after
         window.location.reload();
-
       },
       error: (xhr) => {
         console.log('Error:', xhr.status);

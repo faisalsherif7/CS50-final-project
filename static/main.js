@@ -85,7 +85,7 @@ $(income_table).on('click', 'button#modify-button', (event) => {
   // Replace the row's HTML with two input fields and a submit button
   const formHTML = `
     <td><input type="date" class="form-control mx-auto" name="date" id="date-input" value="${currentDate}"></td>
-    <td><input type="text" class="form-control mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','')}"></td>
+    <td><input type="text" class="form-control mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
     <td>${row.cells[2].textContent}</td>
     <td>${row.cells[3].textContent}</td>
     <td>

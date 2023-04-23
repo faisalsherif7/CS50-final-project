@@ -540,7 +540,7 @@ def update_untracked():
     date = datetime.strptime(date_input, '%Y-%m-%d')
     userid = flasksession.get("user_id")
 
-    if not isfloat(income):
+    if not isfloat(income) or float(income) <= 0:
         response_data = {'message': 'Please enter valid amount!'}
         flash('Please enter valid amount!', 'danger')
         return jsonify(response_data)
@@ -613,7 +613,7 @@ def update_income():
     date = datetime.strptime(date_input, '%Y-%m-%d')
     userid = flasksession.get("user_id")
 
-    if not isfloat(income):
+    if not isfloat(income) or float(income) <= 0:
         response_data = {'message': 'Please enter valid amount!'}
         flash('Please enter valid amount!', 'danger')
         return jsonify(response_data)

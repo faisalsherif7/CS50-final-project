@@ -625,6 +625,8 @@ def update_income():
     entry = session.query(Income).get(income_id)
     entry.date = date
     entry.amount = income
+    entry.due_date = plus_one_hijri(date)
+    entry.due_amount = (2.5/100 * int(income))
     session.commit()
 
     # Take action based on nisab
@@ -649,7 +651,6 @@ def update_income():
     response_data = {'message': 'Entry updated successfully'}
     flash('Entry updated successfully. You savings have dipped below nisab and are now not being tracked.', 'success')
     return jsonify(response_data)
-
 
 
 # SQLAlchemy - Flask removes database sessions at end of request

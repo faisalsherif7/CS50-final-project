@@ -13,17 +13,22 @@
         To get started, users must first set a <a href="/nisab">nisab</a> amount.
     </p>
     <p>
-        The <a href="/dashboard">dashboard</a> tab allows users to add savings, which are automatically calculated and reflected in a table on the same page. If 
-        users need to modify a savings amount, they can simply delete the entry and add another one with the desired amount and date using the form provided. The 
-        savings table will accurately reflect all savings entries made.
+        The <a href="/dashboard">dashboard</a> tab allows users to add savings, which are automatically calculated and displayed in a table on the same page. 
+        Users can modify the date and initial amount of any income entry, and delete entries as needed. All changes made to the savings table are accurately 
+        reflected.
     </p>
     <p>
-        Once a user inputs a zakat amount, RATIB will note and track the amount accordingly based on whether it reaches the nisab or not. If the amount reaches the nisab, 
-        it is tracked for the following hijri year and displayed in a <a href="/due">zakat due</a> table when the payment becomes due. Users can then declare 
-        the amount as paid, and it will be recorded.
+        When a user inputs a zakat amount, RATIB tracks the amount based on whether it reaches the nisab or not. If the amount reaches the nisab, it is tracked 
+        for the following hijri year and displayed in the <a href="/due">Zakat Due</a> table when the payment becomes due. Users can then declare the amount as 
+        paid, and it will be recorded as paid and displayed on the <a href="/history">history</a> tab. 
     </p>
     <p>
-        The <a href="/history">history</a> tab contains information about past paid zakat entries.
+        Any changes made to the savings table - whether by addition, deletion, or modification - are made in relation to the nisab threshold. If the 
+        previous savings were below the nisab amount and then any change causes the nisab amount to be crossed, the savings will begin being tracked from 
+        the date on which the nisab was crossed, and all subsequent entries will be tracked from their respective entry dates for one hijri year. Alternatively, 
+        if the previous total savings already crossed the nisab and then any change causes the total savings to dip below the nisab amount, the zakat tracking 
+        will stop. Users can still view entries on the table, but they will be untracked. Changes made to the untracked table will follow the same principle of 
+        accounting for the nisab as stated earlier.
     </p>
 </div>
 
@@ -72,6 +77,19 @@
                 (From Fataawa al-Lajnah al-Daa’imah, 9/280)
             </figcaption>
         </figure>
+        <p class="fs-4">
+            Additional reference:
+        </p>
+        <p class="fs-4">
+            <ul>
+                <li>
+                    <a href="https://islamqa.info/en/answers/50801/how-should-he-pay-zakaah-on-savings-that-are-not-permanent">IslamQA 1</a>
+                </li>
+                <li>
+                    <a href="https://islamqa.info/en/answers/26113/how-to-calculate-zakah-on-salary">IslamQA 2</a>
+                </li>
+            </ul>
+        </p>
     </div>  
 
 {% endblock %}

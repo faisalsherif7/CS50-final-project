@@ -272,7 +272,7 @@ def nisab():
             session.commit()
             flash('Nisab set successfully.', "success")
 
-        # If nisab is being changed.
+        # If previous nisab is being changed.
         else:
 
             # If savings were above nisab threshold previously, then we work on the Income table.
@@ -370,12 +370,12 @@ def paid():
         flash('Zakat paid; your remaining savings cross the nisab threshold, and so are being tracked for next hijri year.', 'success')
         return redirect('/dashboard')
     
-    # If remaining savings dip below nisab, change tables and stop tracking.
+    # If remaining savings dip below updated nisab, shift previous savings entries to untracked_income table and stop tracking.
     elif remaining_savings < nisab.amount:
-        stop_tracking = Untracked_Income(amount=remaining_savings, user_id=userid)
-        session.add(stop_tracking)
-        incomes = session.query(Income).filter_by(user_id=userid, paid=False).all()
+        incomes = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
         for income in incomes:
+            stop_tracking = Untracked_Income(amount=income.amount, date=income.date, user_id=userid)
+            session.add(stop_tracking)
             session.delete(income)
         nisab.nisab_reached = False
         session.commit()
@@ -388,10 +388,10 @@ def paid():
 def delete_entry():
     userid = flasksession.get("user_id")
     action = request.form.get("action")
+    income_id = request.form.get('income_id')
 
     # If user deletes from untracked table
     if action == 'untracked':
-        income_id = request.form.get('income_id')
         entry = session.query(Untracked_Income).get(income_id)
         session.delete(entry)
         session.commit()
@@ -399,7 +399,6 @@ def delete_entry():
         return redirect('/dashboard')
 
     # Functionality to completely delete an income entry from history
-    income_id = request.form.get('income_id')
     entry = session.query(Income).get(income_id)
     session.delete(entry)
     session.commit()

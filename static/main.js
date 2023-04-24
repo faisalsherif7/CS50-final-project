@@ -64,6 +64,9 @@ $(table).on('click', 'button#modify-button', (event) => {
   });
 });
 
+// Initialize a variable to keep track of the currently edited row
+let currentEditedRow = null;
+
 // Get the table element
 const income_table = document.querySelector('#income-table');
 
@@ -71,6 +74,13 @@ const income_table = document.querySelector('#income-table');
 $(income_table).on('click', 'button#modify-button', (event) => {
   event.preventDefault();
   const button = event.target;
+
+  // Check if there is already an edited row
+  if (currentEditedRow !== null) {
+    // Revert the previously edited row
+    const cancelButton = currentEditedRow.querySelector('button#cancel-button');
+    cancelButton.click();
+  }
 
   // Get the table row containing the clicked button
   const row = button.closest('tr');
@@ -103,6 +113,8 @@ $(income_table).on('click', 'button#modify-button', (event) => {
     // Show rows as before, and show hidden headers
     row.innerHTML = originalRowHTML;
 
+    // Set the currently edited row to null
+    currentEditedRow = null;
   });
 
   // Add an event listener to the save button
@@ -133,4 +145,7 @@ $(income_table).on('click', 'button#modify-button', (event) => {
       }
     });
   });
+
+  // Set the currently edited row to the current row
+  currentEditedRow = row;
 });

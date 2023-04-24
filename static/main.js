@@ -29,8 +29,8 @@ $(table).on('click', 'button#modify-button', (event) => {
   // Replace the row's HTML with two input fields and a submit button
   const formHTML = `
     <td>${row.cells[0].textContent}</td>
-    <td><input type="date" class="form-control mx-auto" name="date" id="date-input" value="${currentDate}"></td>
-    <td><input type="text" class="form-control mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
+    <td><input style="width: 200px;" type="date" class="form-control form-control-sm mx-auto" name="date" id="date-input" value="${currentDate}"></td>
+    <td><input style="width: 200px;" type="text" class="form-control form-control-sm mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
     <td>
       <button class="btn btn-success" type="button" id="save-button">Save</button>
       <button class="btn btn-danger" type="button" id="cancel-button">Cancel</button>
@@ -75,7 +75,7 @@ $(table).on('click', 'button#modify-button', (event) => {
       }
     });
   });
-  
+
   // Set the currently edited row to the current row
   currentEditedRow = row;
 });
@@ -110,8 +110,8 @@ $(income_table).on('click', 'button#modify-button', (event) => {
   // Replace the row's HTML with two input fields and a submit button
   const formHTML = `
     <td>${row.cells[0].textContent}</td>
-    <td><input type="date" class="form-control mx-auto" name="date" id="date-input" value="${currentDate}"></td>
-    <td><input type="text" class="form-control mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
+    <td><input type="date" class="form-control form-control-sm mx-auto" name="date" id="date-input" value="${currentDate}"></td>
+    <td><input type="text" class="form-control form-control-sm mx-auto" name="income" id="income-input" value="${currentIncome.replace('$','').replace(',','').replace('.00','')}"></td>
     <td>${row.cells[3].textContent}</td>
     <td>${row.cells[4].textContent}</td>
     <td>

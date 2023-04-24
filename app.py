@@ -211,35 +211,30 @@ def addmoney():
             # First, add income to untracked entry table
             latest_entry = Untracked_Income(amount=amount, user_id=userid, date=date)
             session.add(latest_entry)
+            nisab.nisab_reached = True
             session.commit()
 
             # Transfer entries from untracked_income table to income table
             query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
-            nisab.nisab_reached = True
 
-            # Iterate over the results and take action when the sum reaches the target amount
+            # Iterate over the results and note date when the sum reaches the target amount
             total = 0
+            nisab_crossing_date = query[0].date # Just intitializing the variable as a date time
             for income in query:
                 total += income.amount
                 if total >= nisab.amount:
-                    
-                    # Add entry number 1 to income table and delete entry from Untracked_Income table
-                    change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * float(total)), date=income.date, due_date=plus_one_hijri(income.date))
-                    session.add(change_table)
-                    session.delete(income)
-                    session.commit()
+                    nisab_crossing_date = income.date
                     break
-                
-                # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
-                else:
-                    session.delete(income)
             
             # Get remaining entries from the Untracked_Income table
             untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
 
             # Loop through each entry and add it to the Income table
             for income in untracked_incomes:
-                entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
+                if income.date < nisab_crossing_date:
+                    entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(nisab_crossing_date))
+                elif income.date >= nisab_crossing_date:
+                    entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
                 session.add(entry)
                 session.delete(income)
                 session.commit()
@@ -315,36 +310,32 @@ def nisab():
                 # If savings cross updated nisab threshold, transfer entries from Untracked_Income table to Income table  
                 elif total_before >= nisab_new:
                     query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
-                    nisab.nisab_reached = True
 
-                    # Iterate over the results and take action when the sum reaches the target amount
+                    # Iterate over the results and note date when the sum reaches the target amount
                     total = 0
+                    nisab_crossing_date = query[0].date
                     for income in query:
                         total += income.amount
                         if total >= nisab_new:
-                            
-                            # Add entry number 1 to income table and delete entry from Untracked_Income table
-                            change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * float(total)), date=income.date, due_date=plus_one_hijri(income.date))
-                            session.add(change_table)
-                            session.delete(income)
-                            session.commit()
+                            nisab_crossing_date = income.date
                             break
-                        
-                        # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
-                        else:
-                            session.delete(income)
                     
                     # Get remaining entries from the Untracked_Income table
                     untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
 
                     # Loop through each entry and add it to the Income table
                     for income in untracked_incomes:
-                        entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
+                        if income.date < nisab_crossing_date:
+                            entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(nisab_crossing_date))
+                        elif income.date >= nisab_crossing_date:
+                            entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
                         session.add(entry)
                         session.delete(income)
                         session.commit()
-                    
-                    # Flash message
+                            
+                    # Update nisab status and flash message
+                    nisab.nisab_reached = True
+                    session.commit()
                     flash('Nisab updated. Your savings now cross the updated nisab threshold and are now tracked for zakat.', 'info')
                 
             # Update nisab. 
@@ -572,30 +563,31 @@ def update_untracked():
     # If nisab reached, transfer entries from Untracked_Income table to Income table   
     query = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
     nisab.nisab_reached = True
+    session.commit()
 
-    # Iterate over the results and take action when the sum reaches the target amount
+    # Iterate over the results and note date when the sum reaches the target amount
     total = 0
+    nisab_crossing_date = query[0].date # Just intitializing the variable as a date time
     for income in query:
         total += income.amount
         if total >= nisab.amount:
-            
-            # Add entry number 1 to income table and delete entry from Untracked_Income table
-            change_table = Income(amount=total, user_id=userid, due_amount= (2.5/100 * float(total)), date=income.date, due_date=plus_one_hijri(income.date))
-            session.add(change_table)
-            session.delete(income)
-            session.commit()
+            nisab_crossing_date = income.date
             break
-        
-        # If not reached nisab yet, delete the income entry from untracked income table after including the amount into the 'total' variable, and continue loop
-        else:
-            session.delete(income)
     
     # Get remaining entries from the Untracked_Income table
     untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).order_by(Untracked_Income.date).all()
 
     # Loop through each entry and add it to the Income table
     for income in untracked_incomes:
-        entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
+
+        # For entries before the sum crosses the nisab threshold, calculate due date from the date of nisab crossing
+        if income.date < nisab_crossing_date:
+            entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(nisab_crossing_date))
+
+        # For entries after the sum crosses nisab threshold, calculate due date normally (ie according to entry date)
+        elif income.date >= nisab_crossing_date:
+            entry = Income(date=income.date, amount=income.amount, user_id=userid, due_amount= (2.5/100 * float(income.amount)), due_date=plus_one_hijri(income.date))
+
         session.add(entry)
         session.delete(income)
         session.commit()

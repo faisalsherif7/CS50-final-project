@@ -149,7 +149,8 @@ def dashboard():
 @app.route('/settings')
 @login_required
 def settings():
-    return render_template('settings.html')
+    user = session.query(User).get(flasksession.get('user_id'))
+    return render_template('settings.html', username=user.username)
 
 
 @app.route('/addmoney', methods=["POST"])
@@ -463,7 +464,7 @@ def due():
 
     # Display zakat due, if any, as of now
     current_date = datetime.now()
-    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False)
+    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False, user_id=flasksession.get("user_id"))
     if incomes_due.count() == 0:
         return render_template('due.html', incomes=None)
     return render_template('due.html', incomes=incomes_due)

@@ -32,6 +32,7 @@
     <table class="table table-bordered mt-3" id="income-table">
         <h1 class="mt-3 text-center"> Savings </h1>
         <thead class="table-dark text-center">
+                <th></th>
                 <th>Date added</th>
                 <th>Amount</th>
                 <th id="due-date-header">Date Due</th>
@@ -41,7 +42,7 @@
             <tbody class="table-info text-center">
                 {% for income in incomes | sort(attribute='date') %}
                 <tr>
-                    
+                    <td class="text-center">{{ loop.index }}</td>
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
                     <td>{{ income.due_date.date() }}</td>
@@ -74,6 +75,7 @@
     <table class="table table-bordered mt-3" id="untracked-table">
         <h1 class="mt-3 text-center"> Savings (Untracked) </h1>
         <thead class="table-dark text-center">
+                <th></th>
                 <th>Date added</th>
                 <th>Amount</th>
                 <th>Modify/Delete</th>
@@ -81,6 +83,7 @@
             <tbody class="table-info text-center">
                 {% for income in untracked_incomes | sort(attribute='date') %}
                 <tr>
+                    <td class="text-center">{{ loop.index }}</td>
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
                     <td class="text-center">

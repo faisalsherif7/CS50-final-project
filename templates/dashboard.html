@@ -6,7 +6,7 @@
 
 <h1 class="mb-2"> Add Savings </h1>
 <p class="fs-4 mt-1 mb-3">
-    Enter your savings amount below. Savings will be noted and tracked or untracked based on whether they reach the nisab or not.
+    
 </p>
 <form class="mb-2" action="/addmoney" method="post">
     <div class="row">
@@ -25,10 +25,6 @@
         </div>
     </div>
 </form>
-<p class="fs-4 mb-3">
-    Your savings will be reflected in the table below. To modify a savings amount, simply delete the 
-    savings and add another entry with the form provided (where date can be chosen).
-</p>
 
 {% if incomes %}
 
@@ -45,6 +41,7 @@
             <tbody class="table-info text-center">
                 {% for income in incomes | sort(attribute='date') %}
                 <tr>
+                    
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
                     <td>{{ income.due_date.date() }}</td>

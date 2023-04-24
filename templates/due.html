@@ -10,6 +10,7 @@
     <table class="table table-bordered mt-3">
         <h1 class="mt-3 text-center"> Zakat Due </h1>
             <thead class="table-dark text-center">
+                <th></th>
                 <th>Date added</th>
                 <th>Amount</th>
                 <th>Date Due</th>
@@ -19,6 +20,7 @@
             <tbody class="table-info text-center">
                 {% for income in incomes %}
                 <tr>
+                    <td class="text-center">{{ loop.index }}</td>
                     <td>{{ income.date.date() }}</td>
                     <td>{{ income.amount | usd}}</td>
                     <td>{{ income.due_date.date() }}</td>

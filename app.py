@@ -368,7 +368,7 @@ def paid():
     remaining_savings = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
     if remaining_savings >= nisab.amount:
         flash('Zakat paid; your remaining savings cross the nisab threshold, and so are being tracked for next hijri year.', 'success')
-        return redirect('/dashboard')
+        return redirect('/due')
     
     # If remaining savings dip below updated nisab, shift previous savings entries to untracked_income table and stop tracking.
     elif remaining_savings < nisab.amount:
@@ -390,6 +390,23 @@ def delete_entry():
     action = request.form.get("action")
     income_id = request.form.get('income_id')
 
+    # If user deletes one entry from history (paid zakat)
+    if action == 'paid':
+        entry = session.query(Income).get(income_id)
+        session.delete(entry)
+        session.commit()
+        flash('Entry deleted.', 'success')
+        return redirect('/history')
+    
+    # If user clears history
+    if action == 'clear_history':
+        history = session.query(Income).filter_by(user_id=userid, paid=True)
+        for income in history:
+            session.delete(income)
+        session.commit()
+        flash('Cleared History.', 'success')
+        return redirect('/history')
+
     # If user deletes from untracked table
     if action == 'untracked':
         entry = session.query(Untracked_Income).get(income_id)
@@ -398,7 +415,7 @@ def delete_entry():
         flash('Entry deleted.', 'success')
         return redirect('/dashboard')
 
-    # Functionality to completely delete an income entry from history
+    # If user deletes tracked (unpaid) entries from Income table
     entry = session.query(Income).get(income_id)
     session.delete(entry)
     session.commit()

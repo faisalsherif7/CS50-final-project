@@ -280,8 +280,25 @@ def nisab():
             if nisab.nisab_reached == True:
                 total_before = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
 
-                # If savings are still above updated nisab, do nothing.
+                # If savings are still above updated nisab, update due dates of entries according to updated nisab
                 if total_before >= nisab_new:
+                    query = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
+
+                    # Iterate over the results and note date when the sum crosses the nisab amount
+                    total = 0
+                    nisab_crossing_date = query[0].date
+                    for income in query:
+                        total += income.amount
+                        if total >= nisab_new:
+                            nisab_crossing_date = income.date
+                            break
+                    
+                    # Update due dates to account for date of crossing nisab threshold
+                    for income in query:
+                        if income.date <= nisab_crossing_date:
+                            income.due_date = plus_one_hijri(nisab_crossing_date)
+                        elif income.date > nisab_crossing_date:
+                            income.due_date = plus_one_hijri(income.date)
                     flash('Nisab updated. Your savings still cross the nisab threshold and are tracked for zakat.', 'info')
                 
                 # If savings dip below updated nisab, change previous savings sum to untracked_income table and stop tracking.

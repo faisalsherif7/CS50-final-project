@@ -58,6 +58,8 @@ def update_due_dates(userid, nisab_amount):
         elif income.date > nisab_crossing_date:
             income.due_date = plus_one_hijri(income.date)
     session.commit()
+
+    # Return function
     return 
 
 
@@ -69,7 +71,7 @@ def start_tracking(userid, nisab_amount):
 
     # Iterate over the results to find date when the sum reaches the target amount
     total = 0
-    nisab_crossing_date = query[0].date # Just intitializing the variable as a datetime object
+    nisab_crossing_date = query[0].date  # Just intitializing the variable as a datetime object
     for income in query:
         total += income.amount
         if total >= nisab_amount:
@@ -91,10 +93,11 @@ def start_tracking(userid, nisab_amount):
         session.delete(income)
         session.commit()
 
+    # Return function
     return
     
 
-# Stop tracking and shift from Incomes to Untracked_Incomes table
+# Stop tracking i.e shift from Incomes to Untracked_Incomes table & update nisab status.
 def stop_tracking(userid, nisab):
     incomes = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
     for income in incomes:

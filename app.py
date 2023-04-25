@@ -65,7 +65,7 @@ def login():
             flasksession["user_id"] = rows.id
 
             # Redirect user to home page
-            return redirect("/")
+            return redirect("/dashboard")
         else:
             return redirect("/login")
 
@@ -449,8 +449,26 @@ def delete_entry():
         session.commit()
         return redirect('/dashboard')
     
-    # If still above nisab, do nothing
+    # If still above nisab, correct due dates if required
     if remaining_savings >= nisab.amount:
+        query = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
+
+        # Iterate over the results and note date when the sum crosses the nisab amount
+        total = 0
+        nisab_crossing_date = query[0].date
+        for income in query:
+            total += income.amount
+            if total >= nisab.amount:
+                nisab_crossing_date = income.date
+                break
+        
+        # Update due dates to account for date of crossing nisab threshold
+        for income in query:
+            if income.date <= nisab_crossing_date:
+                income.due_date = plus_one_hijri(nisab_crossing_date)
+            elif income.date > nisab_crossing_date:
+                income.due_date = plus_one_hijri(income.date)
+        session.commit()
         flash('Entry deleted. Your remaining savings still cross the nisab threshold and zakat is still due.', 'success')
         return redirect('/dashboard')
     
@@ -478,10 +496,8 @@ def history():
 @app.route('/due')
 @login_required
 def due():
-
-    # Display zakat due, if any, as of now
     current_date = datetime.now()
-    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False, user_id=flasksession.get("user_id"))
+    incomes_due = session.query(Income).filter(Income.due_date <= current_date).filter_by(paid=False, user_id=flasksession.get("user_id")).all()
     if incomes_due.count() == 0:
         return render_template('due.html', incomes=None)
     return render_template('due.html', incomes=incomes_due)
@@ -496,7 +512,7 @@ def delete_account():
 
     # Ensure username and password are submitted
     if not username or not password:
-        flash("must provide username/password", "danger")
+        flash("All fields are required!", "danger")
         return redirect('/settings')
 
     # Ensure correct username was submitted 
@@ -507,19 +523,19 @@ def delete_account():
 
     # Ensure username exists and password is correct
     if not user or not check_password_hash(user.hash, password):
-        flash("invalid username and/or password", "danger")
+        flash("Invalid username/password!", "danger")
         return redirect('/settings')
 
     # Delete account and all data
     flasksession.clear()
     session.delete(user)
     incomes = session.query(Income).filter_by(user_id=userid).all()
+    untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).all()
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
     for income in incomes:
         session.delete(income)
-    untracked_incomes = session.query(Untracked_Income).filter_by(user_id=userid).all()
     for income in untracked_incomes:
         session.delete(income)
-    nisab = session.query(Nisab).filter_by(user_id=userid).first()
     if nisab != None:
         session.delete(nisab)
     session.commit()

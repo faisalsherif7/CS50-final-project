@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, ForeignKey, event
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Numeric, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
-from database import db_session as session
 
 class User(Base):
     __tablename__ = 'users'

@@ -1,14 +1,8 @@
-# for functions called by app
+from flask import redirect, session as flasksession, flash
+from hijri_converter import Hijri, Gregorian
 from database import db_session as session
 from models import Income, Untracked_Income
-
-from hijri_converter import Hijri, Gregorian
-from datetime import datetime, timedelta
-from sqlalchemy.sql import func
-
-# for login_required
 from functools import wraps
-from flask import redirect, session as flasksession, flash
 
 
 def plus_one_hijri(input_date):

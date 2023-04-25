@@ -1,5 +1,6 @@
 # for functions called by app
 from database import db_session as session
+from models import Income, Untracked_Income
 
 from hijri_converter import Hijri, Gregorian
 from datetime import datetime, timedelta
@@ -10,19 +11,13 @@ from functools import wraps
 from flask import redirect, session as flasksession, flash
 
 
-def calculate_due_date():
-    current_date = datetime.now()
-    current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
-    next_hijri_year = current_hijri_date.year + 1
-    next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
-    return next_gregorian_date
-
 def plus_one_hijri(input_date):
     current_date = input_date
     current_hijri_date = Gregorian(current_date.year, current_date.month, current_date.day).to_hijri()
     next_hijri_year = current_hijri_date.year + 1
     next_gregorian_date = Hijri(next_hijri_year, current_hijri_date.month, current_hijri_date.day).to_gregorian()
     return next_gregorian_date
+
 
 def login_required(f):
     @wraps(f)
@@ -33,9 +28,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
 
 def isfloat(num):
     try:
@@ -44,8 +41,6 @@ def isfloat(num):
     except ValueError:
         return False
 
-# Import at this line to prevent circular imports
-from models import Income, Untracked_Income
     
 # Ensure correct due dates of entries on addition/modification/deletion of savings or on updation of nisab
 def update_due_dates(userid, nisab_amount):
@@ -101,7 +96,7 @@ def start_tracking(userid, nisab_amount):
         session.add(entry)
         session.delete(income)
         session.commit()
-        
+
     return
     
 

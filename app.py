@@ -160,6 +160,9 @@ def settings():
 def addmoney():
     userid = flasksession.get("user_id")
     date_input = request.form.get('date')
+    if not date_input:
+        flash("Please enter date!")
+        return redirect('/dashboard')
     try:
         date = datetime.strptime(date_input, '%Y-%m-%d')
     except ValueError:
@@ -234,13 +237,21 @@ def addmoney():
 @login_required
 def update_untracked():
 
-    # Get the form data into variables
+    # Get the form data into variables and verify data
     income_id = request.form.get('income_id')
     date_input = request.form.get('date')
+    if not date_input:
+        response_data = {'message': 'Please enter valid date!'}
+        flash("Please enter valid date!", "danger")
+        return jsonify(response_data)
+    try:
+        date = datetime.strptime(date_input, '%Y-%m-%d')
+    except ValueError:
+        response_data = {'message': 'Please enter valid date!'}
+        flash("Please enter valid date!", "danger")
+        return jsonify(response_data)
     income = request.form.get('income')
-    date = datetime.strptime(date_input, '%Y-%m-%d')
     userid = flasksession.get("user_id")
-
     if not isfloat(income) or float(income) <= 0:
         response_data = {'message': 'Please enter valid amount!'}
         flash('Please enter valid amount!', 'danger')
@@ -282,6 +293,16 @@ def update_income():
     # Get the form data into variables
     income_id = request.form.get('income_id')
     date_input = request.form.get('date')
+    if not date_input:
+        response_data = {'message': 'Please enter valid date!'}
+        flash("Please enter valid date!", "danger")
+        return jsonify(response_data)
+    try:
+        date = datetime.strptime(date_input, '%Y-%m-%d')
+    except ValueError:
+        response_data = {'message': 'Please enter valid date!'}
+        flash("Please enter valid date!", "danger")
+        return jsonify(response_data)
     income = request.form.get('income')
     date = datetime.strptime(date_input, '%Y-%m-%d')
     userid = flasksession.get("user_id")

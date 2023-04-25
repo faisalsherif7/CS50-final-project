@@ -176,7 +176,7 @@ def addmoney():
     # First, obtain nisab value. If no nisab value is found, then prompt user to add a nisab value first.
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
     if nisab == None:
-        flash("Please set a nisab value before adding an income", "danger")
+        flash("Please set a nisab value before adding a savings entry!", "danger")
         return redirect('/dashboard')
     
     # Check if nisab has been reached by current savings.
@@ -186,6 +186,26 @@ def addmoney():
     if check == True:
         income = Income(amount=amount, user_id=userid, due_amount= (2.5/100 * float(amount)), date=date, due_date=plus_one_hijri(date))
         session.add(income)
+        session.commit()
+
+        # Ensure correct due dates
+        query = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
+
+        # Iterate over the results and note date when the sum crosses the nisab amount
+        total = 0
+        nisab_crossing_date = query[0].date
+        for income in query:
+            total += income.amount
+            if total >= nisab.amount:
+                nisab_crossing_date = income.date
+                break
+        
+        # Update due dates to account for date of crossing nisab threshold
+        for income in query:
+            if income.date <= nisab_crossing_date:
+                income.due_date = plus_one_hijri(nisab_crossing_date)
+            elif income.date > nisab_crossing_date:
+                income.due_date = plus_one_hijri(income.date)
         session.commit()
         flash("Amount added. Your savings cross the nisab threshold and are being tracked for zakat.", "success")
         return redirect('/dashboard')
@@ -381,7 +401,7 @@ def paid():
     session.add(next_entry)
     session.commit()
 
-    # If remaining savings are above nisab, do nothing.
+    # If remaining savings are above nisab, do nothing. NO, ENSURE CORRECT DUE DATES.
     nisab = session.query(Nisab).filter_by(user_id=userid).first()
     remaining_savings = session.query(func.sum(Income.amount)).filter_by(user_id=userid, paid=False).scalar()
     if remaining_savings >= nisab.amount:
@@ -590,9 +610,6 @@ def update_untracked():
         flash('Please enter valid amount!', 'danger')
         return jsonify(response_data)
 
-    # Get nisab
-    nisab = session.query(Nisab).filter_by(user_id=userid).first()
-    
     # Update database
     entry = session.query(Untracked_Income).get(income_id)
     entry.date = date
@@ -600,6 +617,7 @@ def update_untracked():
     session.commit()
 
     # Take action based on nisab
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
     total_now = session.query(func.sum(Untracked_Income.amount)).filter_by(user_id=userid).scalar()
 
     # If nisab not reached
@@ -617,7 +635,7 @@ def update_untracked():
 
     # Iterate over the results and note date when the sum reaches the target amount
     total = 0
-    nisab_crossing_date = query[0].date # Just intitializing the variable as a date time
+    nisab_crossing_date = query[0].date # Just intitializing the variable as a datetime object
     for income in query:
         total += income.amount
         if total >= nisab.amount:
@@ -664,9 +682,6 @@ def update_income():
         flash('Please enter valid amount!', 'danger')
         return jsonify(response_data)
 
-    # Get nisab
-    nisab = session.query(Nisab).filter_by(user_id=userid).first()
-    
     # Update database
     entry = session.query(Income).get(income_id)
     entry.date = date
@@ -676,10 +691,29 @@ def update_income():
     session.commit()
 
     # Take action based on nisab
+    nisab = session.query(Nisab).filter_by(user_id=userid).first()
     total_now = session.query(func.sum(Income.amount)).filter_by(user_id=userid).scalar()
 
-    # If still above nisab, update and do nothing
+    # If still above nisab, ensure correct due dates 
     if total_now >= nisab.amount:
+        query = session.query(Income).filter_by(user_id=userid, paid=False).order_by(Income.date).all()
+
+        # Iterate over the results and note date when the sum crosses the nisab amount
+        total = 0
+        nisab_crossing_date = query[0].date
+        for income in query:
+            total += income.amount
+            if total >= nisab.amount:
+                nisab_crossing_date = income.date
+                break
+        
+        # Update due dates to account for date of crossing nisab threshold
+        for income in query:
+            if income.date <= nisab_crossing_date:
+                income.due_date = plus_one_hijri(nisab_crossing_date)
+            elif income.date > nisab_crossing_date:
+                income.due_date = plus_one_hijri(income.date)
+        session.commit()
         response_data = {'message': 'Entry updated successfully'}
         flash('Entry updated successfully. You savings still cross the nisab threshold and your income is being tracked for zakat.', 'success')
         return jsonify(response_data)

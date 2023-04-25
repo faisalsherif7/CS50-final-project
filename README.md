@@ -1,8 +1,6 @@
-# RATIB
+# RATIB Zakat Tracker
 #### Video Demo:  <URL HERE>
-
-## RATIB Zakat Tracker
-RATIB is designed to help users easily and accurately calculate and keep track of zakat payments on their salary, based on Shaykh Ibn Baz's fatwa on how to calculate zakat on monthly salaries. Users can set a nisab and track individual salary/income entries for one hijri year, according to the date of crossing nisab threshold. Users can modify or delete individual entries, and also modify nisab at any point - and RATIB will make necessary changes to the savings entries to account for the changes made by the user.
+#### Description: RATIB is a web app designed to help users easily and accurately calculate and keep track of zakat payments on their salary, based on Shaykh Ibn Baz's fatwa on how to calculate zakat on monthly salaries. Users can set a nisab and track individual salary/income entries for one hijri year, according to the date of crossing nisab threshold. Users can modify or delete individual entries, and also modify nisab at any point - and RATIB will make necessary changes to the savings entries to account for the changes made by the user.
 
 ## Features
 - Users need to set a nisab amount which can be updated later. When changing the nisab value, previous savings will be adjusted accordingly. If the sum of previous savings was below the previous nisab and remains below the updated nisab, it will continue to be recorded in a table but not tracked for zakat. However, if the savings cross the nisab, all entries will begin being tracked for zakat from the moment they cross the nisab threshold. Due dates of each entry will accurately reflect the date of crossing nisab whenever nisab is changed.
@@ -17,5 +15,5 @@ The project files are organized as follows:
 - utils.py defines functions that are used in app.py.
 - models.py defines the sqlalchemy tables, and create.py is used to create them 
 - zakat.db is the database.
-- /static contains the bootswatch lux file which styles the website using Bootstrap. It also contains the javascript file.
+- /static containts lux.css for styling and main.js javascript file
 - /templates contains the html files for the website.

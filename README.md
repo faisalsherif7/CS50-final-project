@@ -1,5 +1,5 @@
 # RATIB Zakat Tracker
-#### Video Demo:  <URL HERE>
+#### Video Demo:  https://youtu.be/OAnOAOdjEt8
 #### Description: RATIB is a web app designed to help users easily and accurately calculate and keep track of zakat payments on their salary, based on Shaykh Ibn Baz's fatwa on how to calculate zakat on monthly salaries. Users can set a nisab and track individual salary/income entries for one hijri year, according to the date of crossing nisab threshold. Users can modify or delete individual entries, and also modify nisab at any point - and RATIB will make necessary changes to the savings entries to account for the changes made by the user.
 
 ## Features

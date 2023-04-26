@@ -424,9 +424,8 @@ def paid():
 
     # Add remaining amount to savings
     next_amount = entry.amount - entry.due_amount
-    new_entry_date = entry.due_date
-    next_entry = Income(amount=next_amount, user_id=userid, 
-                        due_date=plus_one_hijri(new_entry_date), 
+    next_entry = Income(amount=next_amount, user_id=userid,
+                        date=entry.date, due_date=plus_one_hijri(entry.due_date),
                         due_amount= (2.5/100 * float(next_amount)))
     session.add(next_entry)
     session.commit()

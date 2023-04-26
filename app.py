@@ -124,7 +124,10 @@ def register():
 @app.route('/')
 @app.route('/home')
 def index():
-    return render_template("home.html")
+    if flasksession.get("user_id"):
+        return redirect('/dashboard')
+    else:
+        return render_template("home.html")
 
 
 @app.route('/guide')

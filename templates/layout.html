@@ -22,54 +22,34 @@
 </head>
 
 <body>
-  <nav class="navbar">
-    <div>
-      <a href="/">Ratib</a>
-      <button type="button" data-toggle="collapse" data-target="#navbarNav">
-        <span></span>
-      </button>
-      <div id="navbarNav">
-        {% if session["user_id"] %}
-        <ul>
-          <li>
-            <a href="/dashboard">Dashboard</a>
-          </li>
-          <li>
-            <a href="/nisab">Set Nisab</a>
-          </li>
-          <li>
-          </li>
-          <li>
-            <a href="/history">History</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-            <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="dropdown">
-              <img src="/static/user.jpg" alt="Bootstrap" height="27" width="27">
-            </a>
-            <ul>
-              <li><a href="/guide">About</a></li>
-              <li><a href="/settings">Settings</a></li>
-              <li><hr></li>
-              <li><a href="/logout">Log Out</a></li>
-            </ul>
-        </ul>
-        {% else %}
-        <ul>
-          <li>
-            <a href="/guide">About</a>
-          </li>
-        </ul>
-        <ul>
-          <li>
-            <a href="/login">Login/Register</a>
-          </li>
-        </ul>
-        {% endif %}
+
+    <div class="navbar-container">
+      <span class="navbar-brand">
+        <a href="/">Ratib</a>
+      </span>
+
+      {% if session["user_id"] %}
+
+      <div class="navbar-middle">
+        <span><a href="/dashboard">Dashboard</a></span>
+        <span><a href="/nisab">Set Nisab</a></span>
+        <span><a href="/history">History</a></span>
       </div>
+      
+      <div class="navbar-end">
+        <span><a href="/guide">About</a></span>
+        <span><a href="/settings">Settings</a></span>
+        <span><a href="/logout">Log Out</a></span>
+      </div>
+
+      {% else %}
+
+      <div class="navbar-end">
+        <span><a href="/guide">About</a></span>
+        <span><a href="/login">Login/Register</a></span>
+      </div>
+      {% endif %}
     </div>
-  </nav>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -84,7 +64,7 @@
 
   <div id="content">
     <main>
-      <div>
+      <div class="main-content">
         {% block content %}{% endblock %}
       </div>
     </main>

@@ -8,59 +8,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
 
   <!-- My CSS -->
-  <link rel="stylesheet" href="/static/lux.css">
+  <!-- <link rel="stylesheet" href="/static/lux.css"> -->
+
+  <link rel="stylesheet" href="/static/style.css">
+
   <title>Ratib - {% block title %}{% endblock %}</title>
+
   {% endblock %}
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark mx-auto">
-    <div class="container-fluid">
-      <a class="navbar-brand ml-3" href="/">Ratib</a>
-      <button class="navbar-toggler mr-3" type="button" data-toggle="collapse" data-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+  <nav class="navbar">
+    <div>
+      <a href="/">Ratib</a>
+      <button type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div id="navbarNav">
         {% if session["user_id"] %}
-        <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/dashboard">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/nisab">Set Nisab</a>
-        </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/due">Zakat Due</a>
-          </li> 
-          <li class="nav-item">
-            <a class="nav-link" href="/history">History</a>
+        <ul>
+          <li>
+            <a href="/dashboard">Dashboard</a>
+          </li>
+          <li>
+            <a href="/nisab">Set Nisab</a>
+          </li>
+          <li>
+          </li>
+          <li>
+            <a href="/history">History</a>
           </li>
         </ul>
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="dropdown">
+        <ul>
+          <li>
+            <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-toggle="dropdown">
               <img src="/static/user.jpg" alt="Bootstrap" height="27" width="27">
             </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/guide">About</a></li>
-              <li><a class="dropdown-item" href="/settings">Settings</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/logout">Log Out</a></li>
+            <ul>
+              <li><a href="/guide">About</a></li>
+              <li><a href="/settings">Settings</a></li>
+              <li><hr></li>
+              <li><a href="/logout">Log Out</a></li>
             </ul>
         </ul>
         {% else %}
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/guide">About</a>
+        <ul>
+          <li>
+            <a href="/guide">About</a>
           </li>
         </ul>
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/login">Login/Register</a>
+        <ul>
+          <li>
+            <a href="/login">Login/Register</a>
           </li>
         </ul>
         {% endif %}
@@ -71,7 +74,7 @@
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
-      <div class="alert alert-{{ category }} mb-0 text-center" role="alert">
+      <div role="alert">
         {{ message }}
       </div>
     {% endfor %}
@@ -80,8 +83,8 @@
 
 
   <div id="content">
-    <main class="container py-5 text-center">
-      <div class="row text-left">
+    <main>
+      <div>
         {% block content %}{% endblock %}
       </div>
     </main>

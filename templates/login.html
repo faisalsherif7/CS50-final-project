@@ -3,7 +3,7 @@
 {% block title %}Login/Register{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<!-- <div class="row justify-content-center">
   <div class="card text-center col-9">
     <div class="card-header text-white">
       <ul class="nav nav-tabs card-header-tabs justify-content-center">
@@ -28,5 +28,26 @@
       </form>
     </div>
   </div>
+</div> -->
+
+<div class="login-register-modal">
+
+  <a class="modal-header" href="/login">Log in</a>
+  
+  <form action="/login" method="post">
+    <div class="form-content">
+      <label for="username">Username:</label>
+      <input autocomplete="off" autofocus id="username" name="username" placeholder="Enter username" type="text">
+      <label for="password">Password:</label>
+      <input autocomplete="off" id="password" name="password" placeholder="Enter password" type="password">
+      <button type="submit">Log In</button>
+    </div>
+  </form>
+
+  <a href="/register">Register</a>
+  
 </div>
+
+
+
 {% endblock %}
